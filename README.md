@@ -1,2 +1,0 @@
-# vaidartudocerto
-a ta

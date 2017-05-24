@@ -42,7 +42,7 @@ app.controller('myCtrl', function($scope, $http) {
      );
      request.error(function(reply, status) {
         $scope.codigo = status;
-        $scope.payload = "nao deu certo"//reply;
+        $scope.payload = reply;
        }
     );
   };

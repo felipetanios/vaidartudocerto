@@ -1,18 +1,24 @@
 var mongoose = require("mongoose");
-mongoose.connect('mongodb://localhost:27017/alunosDB');
 
-var schema = mongoose.Schema;
-var copiesSchema = {
-    "owner": String,
+mongoose.Promise = global.Promise;
+
+conn1 = mongoose.createConnection('mongodb://localhost:27017/exemplaresDB');
+
+var Schema = mongoose.Schema;
+
+var exemplaresSchema = new Schema({
+    "nExemplar": Number,
     "title": String,
     "author": String,
     "area": String
-};
-module.exports = mongoose.model('copies', copiesSchema);
+});
 
-var userSchema = {
-    "user": String,
-    "password": String,
-    "name": String
-};
-module.exports = mongoose.model('users', userSchema);
+module.exports = conn1.model('exemplares', exemplaresSchema);
+
+/* 
+	{"nExemplar":"123", "title":"Hello", "author":"João", "area":"História"}
+
+
+	{"owner":"Pedro", "nLivro":"333","nExemplar":"123"}
+
+*/

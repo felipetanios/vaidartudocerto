@@ -8,8 +8,8 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
 // adicione "ponteiro" para o MongoDB
-var mongoOp = require('./models/mongo');
-var mongoOp2 = require('./models/mongo2');
+var mongoBooks = require('./models/mongoBooks');
+//var mongoOp2 = require('./models/mongo2');  // ARQUIVO RELACIONADO A OUTRO DB
 
 // comente as duas linhas abaixo
 // var index = require('./routes/index');
@@ -64,7 +64,7 @@ module.exports = app;
 // HTTP GET, POST, PUT, DELETE
 
 /**
-**    REQUISIÇÕES HTTP PARA OS EXEMPLARES
+**    REQUISIÇÕES HTTP PARA OS LIVROS
 **
 **
 **/
@@ -79,148 +79,14 @@ router.route('/')
    }
   );
 
-router.route('/exemplares')   // operacoes sobre todos os exemplares
+router.route('/books')   // operacoes sobre todos os exemplares
   .get(function(req, res) {  // GET
     var response = {};
 
     console.log(req.path);
     console.log(JSON.stringify(req.body));
 
-    mongoOp.find({}, function(erro, data) {
-       if(erro)
-          response = {"resultado": "Falha de acesso ao BD"};
-        else
-          response = {"exemplares": data};
-          
-          res.json(response);
-        }
-      )
-    }
-  )
-  .post(function(req, res) {   // POST (cria)
-     var query = {"nExemplar": req.body.nExemplar};
-     var response = {};
-
-     console.log(req.path);
-     console.log(JSON.stringify(req.body));
-     console.log(query);
-
-     mongoOp.findOne(query, function(erro, data) {
-      
-        if (data == null) {
-           var db = new mongoOp();
-           db.nExemplar = req.body.nExemplar;        // usado "ident" ao invés de "id" para evitar problemas
-           db.title = req.body.title;
-           db.author = req.body.author;
-	         db.area = req.body.area;
-           db.save(function(erro) {
-             if(erro) {
-                 response = {"resultado": "Falha de insercao no BD"};
-                 res.json(response);
-             } else {
-                 response = {"resultado": "Exemplar inserido no BD"};
-                 res.json(response);
-              }
-            }
-          )
-        } else {
-	          response = {"resultado": "Exemplar ja existente"};
-            res.json(response);
-          }
-        }
-      )
-    }
-  );
-
-
-router.route('/exemplares/:nExemplar')   // operacoes sobre um exemplar
-  .get(function(req, res) {   // GET
-      var response = {};
-      var query = {"nExemplar": req.params.nExemplar};
-
-      console.log(req.path);
-      console.log(JSON.stringify(req.body));
-      console.log(query);
-
-      mongoOp.findOne(query, function(erro, data) {
-       
-         if(erro) {
-            response = {"resultado": "falha de acesso ao BD"};
-            res.json(response);
-         } else if (data == null) {
-            response = {"resultado": "exemplar inexistente"};
-            res.json(response);   
-	       } else {
-	          response = {"exemplares": [data]};
-            res.json(response);
-          }
-        }
-      )
-    }
-  )
-  .put(function(req, res) {   // PUT (altera)
-      var response = {};
-      var query = {"nExemplar": req.params.nExemplar};
-      var data = {"title": req.body.title, "author": req.body.author};
-
-      console.log(req.path);
-      console.log(JSON.stringify(req.body));
-      console.log(query);
-
-      mongoOp.findOneAndUpdate(query, data, function(erro, data) {
-          
-          if(erro) {
-            response = {"resultado": "falha de acesso ao DB"};
-            res.json(response);
-	        } else if (data == null) { 
-             response = {"resultado": "exemplar inexistente"};
-             res.json(response);   
-          } else {
-             response = {"resultado": "exemplar atualizado no BD"};
-             res.json(response);   
-	  }
-        }
-      )
-    }
-  )
-  .delete(function(req, res) {   // DELETE (remove)
-     var response = {};
-     var query = {"nExemplar": req.params.nExemplar};
-
-     console.log(req.path);
-     console.log(JSON.stringify(req.body));
-     console.log(query);
-     mongoOp.findOneAndRemove(query, function(erro, data) {
-       
-         if(erro) {
-            response = {"resultado": "falha de acesso ao DB"};
-            res.json(response);
-	       }else if (data == null) {	      
-             response = {"resultado": "exemplar inexistente"};
-             res.json(response);
-            } else {
-              response = {"resultado": "exemplar removido do BD"};
-              res.json(response);
-	           }
-          }
-        )
-    }
-  );
-
-/**
-**    REQUISIÇÕES HTTP PARA OS LIVROS
-**    **ANALISAR IDENTIFICADOR DE LIVRO E EXEMPLAR
-**
-**/
-
-router.route('/livros')   // operacoes sobre todos os exemplares
-  .get(function(req, res) {  // GET
-    var response = {};
-
-    console.log(req.path);
-    console.log(JSON.stringify(req.body));
-
-    mongoOp2.find({}, function(erro, data) {
+    mongoBooks.find({}, function(erro, data) {
        if(erro)
           response = {"resultado": "Falha de acesso ao BD"};
         else
@@ -232,20 +98,19 @@ router.route('/livros')   // operacoes sobre todos os exemplares
     }
   )
   .post(function(req, res) {   // POST (cria)
-     var query = {"nLivro": req.body.nLivro};
+     var query = {"title": req.body.title};
      var response = {};
 
      console.log(req.path);
      console.log(JSON.stringify(req.body));
      console.log(query);
 
-     mongoOp2.findOne(query, function(erro, data) {
+     mongoBooks.findOne(query, function(erro, data) {
       
         if (data == null) {
-           var db = new mongoOp2();
-           db.nLivro = req.body.nLivro;     // numero identificador do livro
+           var db = new mongoBooks();
            db.owner = req.body.owner;
-           db.nExemplar = req.body.nExemplar;     // numero especifico do exemplar do livro 
+           db.title = req.body.title;     
 
            db.save(function(erro) {
              if(erro) {
@@ -267,16 +132,16 @@ router.route('/livros')   // operacoes sobre todos os exemplares
   );
 
 
-router.route('/livros/:nLivro')   // operacoes sobre um livro
+router.route('/books/:title')   // operacoes sobre um livro
   .get(function(req, res) {   // GET
       var response = {};
-      var query = {"nLivro": req.params.nLivro};
+      var query = {"title": req.params.title};
 
       console.log(req.path);
       console.log(JSON.stringify(req.body));
       console.log(query);
 
-      mongoOp2.findOne(query, function(erro, data) {
+      mongoBooks.findOne(query, function(erro, data) {
        
          if(erro) {
             response = {"resultado": "falha de acesso ao BD"};
@@ -294,14 +159,14 @@ router.route('/livros/:nLivro')   // operacoes sobre um livro
   )
   .put(function(req, res) {   // PUT (altera)
       var response = {};
-      var query = {"nLivro": req.params.nLivro};
-      var data = {"owner": req.body.owner};
+      var query = {"title": req.params.title};
+      var data = {"title": req.params.title, "owner": req.body.owner};
 
       console.log(req.path);
       console.log(JSON.stringify(req.body));
       console.log(query);
 
-      mongoOp2.findOneAndUpdate(query, data, function(erro, data) {
+      mongoBooks.findOneAndUpdate(query, data, function(erro, data) {
           
           if(erro) {
             response = {"resultado": "falha de acesso ao DB"};
@@ -319,12 +184,12 @@ router.route('/livros/:nLivro')   // operacoes sobre um livro
   )
   .delete(function(req, res) {   // DELETE (remove)
      var response = {};
-     var query = {"nLivro": req.params.nLivro};
+     var query = {"title": req.params.title};
 
      console.log(req.path);
      console.log(JSON.stringify(req.body));
      console.log(query);
-     mongoOp2.findOneAndRemove(query, function(erro, data) {
+     mongoBooks.findOneAndRemove(query, function(erro, data) {
        
          if(erro) {
             response = {"resultado": "falha de acesso ao DB"};

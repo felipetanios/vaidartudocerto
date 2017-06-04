@@ -261,4 +261,3 @@ router.route('/trade')   // operacoes sobre todos os exemplares
       )
     }
   );
-

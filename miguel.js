@@ -9,7 +9,7 @@ var bodyParser = require('body-parser');
 
 // adicione "ponteiro" para o MongoDB
 var mongoBooks = require('./models/mongoBooks');
-var mongoTrade = require('./models/mongoTrade'); 
+var mongoTrade = require('./models/mongoTrade');
 
 // comente as duas linhas abaixo
 // var index = require('./routes/index');
@@ -70,7 +70,7 @@ module.exports = app;
 **/
 
 // index.html
-router.route('/') 
+router.route('/')
   .get(function(req, res) {  // GET
       var path = 'index.html';
       res.sendfile(path, {"root": "./"});
@@ -91,7 +91,7 @@ router.route('/books')   // operacoes sobre todos os exemplares
           response = {"resultado": "Falha de acesso ao BD"};
         else
           response = {"books": data};
-          
+
           res.json(response);
         }
       )
@@ -106,11 +106,11 @@ router.route('/books')   // operacoes sobre todos os exemplares
      console.log(query);
 
      mongoBooks.findOne(query, function(erro, data) {
-      
+
         if (data == null) {
            var db = new mongoBooks();
            db.owner = req.body.owner;
-           db.title = req.body.title;     
+           db.title = req.body.title;
 
            db.save(function(erro) {
              if(erro) {
@@ -141,13 +141,13 @@ router.route('/books/:title')   // operacoes sobre um livro
       console.log(query);
 
       mongoBooks.findOne(query, function(erro, data) {
-       
+
          if(erro) {
             response = {"resultado": "Falha de acesso ao BD."};
             res.json(response);
          } else if (data == null) {
             response = {"resultado": "Livro inexistente."};
-            res.json(response);   
+            res.json(response);
          } else {
             response = {"books": [data]};
             console.log(response);
@@ -156,8 +156,6 @@ router.route('/books/:title')   // operacoes sobre um livro
           }
         }
       )
-    
-      
     }
   )
   .put(function(req, res) {   // PUT (altera)
@@ -170,16 +168,16 @@ router.route('/books/:title')   // operacoes sobre um livro
       console.log(query);
 
       mongoBooks.findOneAndUpdate(query, data, function(erro, data) {
-          
+
           if(erro) {
             response = {"resultado": "Falha de acesso ao BD!"};
             res.json(response);
-          } else if (data == null) { 
+          } else if (data == null) {
              response = {"resultado": "Livro inexistente."};
-             res.json(response);   
+             res.json(response);
           } else {
              response = {"resultado": "Livro atualizado."};
-             res.json(response);   
+             res.json(response);
     }
         }
       )
@@ -193,11 +191,11 @@ router.route('/books/:title')   // operacoes sobre um livro
      console.log(JSON.stringify(req.body));
      console.log(query);
      mongoBooks.findOneAndRemove(query, function(erro, data) {
-       
+
          if(erro) {
             response = {"resultado": "Falha de acesso ao BD!"};
             res.json(response);
-         }else if (data == null) {        
+         }else if (data == null) {
              response = {"resultado": "Livro inexistente."};
              res.json(response);
             } else {
@@ -220,7 +218,7 @@ router.route('/trade')   // operacoes sobre todos os exemplares
           response = {"resultado": "Falha de acesso ao BD!"};
         else
           response = {"Trocas": data};
-          
+
           res.json(response);
         }
       )
@@ -235,13 +233,13 @@ router.route('/trade')   // operacoes sobre todos os exemplares
      console.log(query);
 
      mongoTrade.findOne(query, function(erro, data) {
-      
+
         if (data == null) {
            var db = new mongoTrade();
            db.idTrade = req.body.idTrade;
            db.UserReq = req.body.UserReq;
            db.UserResp = req.body.UserResp;
-           db.titleBook = req.body.titleBook;    
+           db.titleBook = req.body.titleBook;
 
            db.save(function(erro) {
              if(erro) {
@@ -261,3 +259,54 @@ router.route('/trade')   // operacoes sobre todos os exemplares
       )
     }
   );
+
+router.route('/trade/:UserReq')   // operacoes sobre um livro
+  .get(function(req, res) {   // GET
+      var response = {};
+      var query = {"UserReq": req.params.UserReq};
+
+      console.log(req.path);
+      console.log(JSON.stringify(req.body));
+      console.log(query);
+
+      mongoTrade.findOne(query, function(erro, data) {
+
+         if(erro) {
+            response = {"resultado": "Falha de acesso ao BD."};
+            res.json(response);
+         } else if (data == null) {
+            response = {"resultado": "Troca inexistente."};
+            res.json(response);
+         } else {
+            response = {"UserReq": [data]};
+            console.log(response);
+            res.json(response);
+
+          }
+        }
+      )
+    }
+
+    .delete(function(req, res) {   // DELETE (remove)
+       var response = {};
+       var query = {"UserReq": req.params.UserReq};
+
+       console.log(req.path);
+       console.log(JSON.stringify(req.body));
+       console.log(query);
+       mongoTrade.findOneAndRemove(query, function(erro, data) {
+
+           if(erro) {
+              response = {"resultado": "Falha de acesso ao BD!"};
+              res.json(response);
+           }else if (data == null) {
+               response = {"resultado": "Troca inexistente."};
+               res.json(response);
+              } else {
+                response = {"resultado": "Troca removida."};
+                res.json(response);
+               }
+            }
+          )
+      }
+);

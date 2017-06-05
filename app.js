@@ -1,4 +1,4 @@
- // Servidor da aplicacao
+// Servidor da aplicacao
 
 var express = require('express');
 var path = require('path');
@@ -9,6 +9,7 @@ var bodyParser = require('body-parser');
 
 // adicione "ponteiro" para o MongoDB
 var mongoBooks = require('./models/mongoBooks');
+var mongoUsers = require('./models/mongoUsers');
 //var mongoOp2 = require('./models/mongo2');  // ARQUIVO RELACIONADO A OUTRO DB
 
 // comente as duas linhas abaixo
@@ -42,20 +43,20 @@ app.use('/', router);   // deve vir depois de app.use(bodyParser...
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+ var err = new Error('Not Found');
+ err.status = 404;
+ next(err);
 });
 
 // error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+ // set locals, only providing error in development
+ res.locals.message = err.message;
+ res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+ // render the error page
+ res.status(err.status || 500);
+ res.render('error');
 });
 
 module.exports = app;
@@ -70,138 +71,231 @@ module.exports = app;
 **/
 
 // index.html
-router.route('/') 
-  .get(function(req, res) {  // GET
-      var path = 'index.html';
-      res.sendfile(path, {"root": "./"});
-      console.log(req.path);
-      console.log(JSON.stringify(req.body));
-   }
-  );
+router.route('/')
+ .get(function(req, res) {  // GET
+     var path = 'index.html';
+     res.sendfile(path, {"root": "./"});
+     console.log(req.path);
+     console.log(JSON.stringify(req.body));
+  }
+ );
 
 router.route('/books')   // operacoes sobre todos os exemplares
-  .get(function(req, res) {  // GET
+ .get(function(req, res) {  // GET
+   var response = {};
+
+   console.log(req.path);
+   console.log(JSON.stringify(req.body));
+
+   mongoBooks.find({}, function(erro, data) {
+      if(erro)
+         response = {"resultado": "Falha de acesso ao BD"};
+       else
+         response = {"livros": data};
+
+         res.json(response);
+       }
+     )
+   }
+ )
+ .post(function(req, res) {   // POST (cria)
+    var query = {"title": req.body.title};
     var response = {};
 
     console.log(req.path);
     console.log(JSON.stringify(req.body));
+    console.log(query);
 
-    mongoBooks.find({}, function(erro, data) {
-       if(erro)
-          response = {"resultado": "Falha de acesso ao BD"};
-        else
-          response = {"livros": data};
-          
-          res.json(response);
-        }
-      )
-    }
-  )
-  .post(function(req, res) {   // POST (cria)
-     var query = {"title": req.body.title};
-     var response = {};
+    mongoBooks.findOne(query, function(erro, data) {
 
-     console.log(req.path);
-     console.log(JSON.stringify(req.body));
-     console.log(query);
+       if (data == null) {
+          var db = new mongoBooks();
+          db.owner = req.body.owner;
+          db.title = req.body.title;
 
-     mongoBooks.findOne(query, function(erro, data) {
-      
-        if (data == null) {
-           var db = new mongoBooks();
-           db.owner = req.body.owner;
-           db.title = req.body.title;     
-
-           db.save(function(erro) {
-             if(erro) {
-                 response = {"resultado": "Falha de insercao no BD"};
-                 res.json(response);
-             } else {
-                 response = {"resultado": "Livro inserido no BD"};
-                 res.json(response);
-              }
-            }
-          )
-        } else {
-            response = {"resultado": "Livro ja existente"};
-            res.json(response);
-          }
-        }
-      )
-    }
-  );
+          db.save(function(erro) {
+            if(erro) {
+                response = {"resultado": "Falha de insercao no BD"};
+                res.json(response);
+            } else {
+                response = {"resultado": "Livro inserido no BD"};
+                res.json(response);
+             }
+           }
+         )
+       } else {
+           response = {"resultado": "Livro ja existente"};
+           res.json(response);
+         }
+       }
+     )
+   }
+ );
 
 
 router.route('/books/:title')   // operacoes sobre um livro
-  .get(function(req, res) {   // GET
-      var response = {};
-      var query = {"title": req.params.title};
-
-      console.log(req.path);
-      console.log(JSON.stringify(req.body));
-      console.log(query);
-
-      mongoBooks.findOne(query, function(erro, data) {
-       
-         if(erro) {
-            response = {"resultado": "falha de acesso ao BD"};
-            res.json(response);
-         } else if (data == null) {
-            response = {"resultado": "livro inexistente"};
-            res.json(response);   
-         } else {
-            response = {"livros": [data]};
-            res.json(response);
-          }
-        }
-      )
-    }
-  )
-  .put(function(req, res) {   // PUT (altera)
-      var response = {};
-      var query = {"title": req.params.title};
-      var data = {"title": req.params.title, "owner": req.body.owner};
-
-      console.log(req.path);
-      console.log(JSON.stringify(req.body));
-      console.log(query);
-
-      mongoBooks.findOneAndUpdate(query, data, function(erro, data) {
-          
-          if(erro) {
-            response = {"resultado": "falha de acesso ao DB"};
-            res.json(response);
-          } else if (data == null) { 
-             response = {"resultado": "livro inexistente"};
-             res.json(response);   
-          } else {
-             response = {"resultado": "livro atualizado no BD"};
-             res.json(response);   
-    }
-        }
-      )
-    }
-  )
-  .delete(function(req, res) {   // DELETE (remove)
+ .get(function(req, res) {   // GET
      var response = {};
      var query = {"title": req.params.title};
 
      console.log(req.path);
      console.log(JSON.stringify(req.body));
      console.log(query);
-     mongoBooks.findOneAndRemove(query, function(erro, data) {
-       
+
+     mongoBooks.findOne(query, function(erro, data) {
+
+        if(erro) {
+           response = {"resultado": "falha de acesso ao BD"};
+           res.json(response);
+        } else if (data == null) {
+           response = {"resultado": "livro inexistente"};
+           res.json(response);
+        } else {
+           response = {"livros": [data]};
+           res.json(response);
+         }
+       }
+     )
+   }
+ )
+ .put(function(req, res) {   // PUT (altera)
+     var response = {};
+     var query = {"title": req.params.title};
+     var data = {"title": req.params.title, "owner": req.body.owner};
+
+     console.log(req.path);
+     console.log(JSON.stringify(req.body));
+     console.log(query);
+
+     mongoBooks.findOneAndUpdate(query, data, function(erro, data) {
+
          if(erro) {
-            response = {"resultado": "falha de acesso ao DB"};
+           response = {"resultado": "falha de acesso ao DB"};
+           res.json(response);
+         } else if (data == null) {
+            response = {"resultado": "livro inexistente"};
             res.json(response);
-         }else if (data == null) {        
-             response = {"resultado": "livro inexistente"};
+         } else {
+            response = {"resultado": "livro atualizado no BD"};
+            res.json(response);
+   }
+       }
+     )
+   }
+ )
+ .delete(function(req, res) {   // DELETE (remove)
+    var response = {};
+    var query = {"title": req.params.title};
+
+    console.log(req.path);
+    console.log(JSON.stringify(req.body));
+    console.log(query);
+    mongoBooks.findOneAndRemove(query, function(erro, data) {
+
+        if(erro) {
+           response = {"resultado": "falha de acesso ao DB"};
+           res.json(response);
+        }else if (data == null) {
+            response = {"resultado": "livro inexistente"};
+            res.json(response);
+           } else {
+             response = {"resultado": "livro removido do BD"};
              res.json(response);
-            } else {
-              response = {"resultado": "livro removido do BD"};
-              res.json(response);
-             }
+            }
+         }
+       )
+   }
+ );
+
+
+/*--------------USER--------------*/
+
+ router.route('/users')   // operacoes sobre todos os usuarios
+
+
+  //sign up
+  .post(function(req, res) {   // POST (cria)
+     var query = {"user": req.body.user}
+     var response = {};
+
+     console.log(req.path);
+     console.log(JSON.stringify(req.body));
+     console.log(query);
+
+     mongoUsers.findOne(query, function(erro, data) {
+
+        if (data == null) {
+           var db = new mongoUsers();
+           db.user = req.body.user;
+           db.password = req.body.password;
+
+           db.save(function(erro) {
+             if(erro) {
+                 response = {"resultado": "Falha de insercao no BD"};
+                 res.json(response);
+             } else {
+                 response = {"resultado": "Usuario cadastrado"};
+                 res.json(response);
+              }
+            }
+          )
+        } else {
+            response = {"resultado": "Usuario ja existente"};
+            res.json(response);
           }
-        )
+        }
+      )
     }
-  );
+  )
+
+router.route('/users/:user')   // operacoes sobre um usuario
+  //delete user
+  .delete(function(req, res) {  // GET
+    var response = {};
+
+    var query = {"user": req.params.user}
+    console.log(req.path);
+    console.log(JSON.stringify(req.body));
+    console.log(query);
+
+    mongoUsers.findOneAndRemove(query, function(erro, data) {
+
+        if(erro) {
+           response = {"resultado": "falha de acesso ao DB"};
+           res.json(response);
+        }else if (data == null) {
+            response = {"resultado": "Usuario inexistente"};
+            res.json(response);
+           } else {
+             response = {"resultado": "Usuario removido do BD"};
+             res.json(response);
+            }
+         }
+       )
+   }
+ )
+ //acho que eh essa a parte do sign in
+ .get(function(req, res) {   // GET
+     var response = {};
+     var query = {"user": req.params.user}
+
+     console.log(req.path);
+     console.log(JSON.stringify(req.body));
+     console.log(query);
+
+     mongoUsers.findOne(query, function(erro, data) {
+
+        if(erro) {
+           response = {"resultado": "falha de acesso ao BD"};
+           res.json(response);
+        } else if (data == null) {
+           response = {"resultado": "usuario"};
+           res.json(response);
+        } else {
+           response = {"usuario": [data]};
+           res.json(response);
+         }
+       }
+     )
+   }
+ )

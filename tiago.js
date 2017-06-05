@@ -110,7 +110,9 @@ router.route('/books')   // operacoes sobre todos os exemplares
         if (data == null) {
            var db = new mongoBooks();
            db.owner = req.body.owner;
-           db.title = req.body.title;     
+           db.title = req.body.title;
+           db.author = req.body.author;
+           db.area = req.body.area;     
 
            db.save(function(erro) {
              if(erro) {
@@ -163,7 +165,8 @@ router.route('/books/:title')   // operacoes sobre um livro
   .put(function(req, res) {   // PUT (altera)
       var response = {};
       var query = {"title": req.params.title};
-      var data = {"title": req.params.title, "owner": req.body.owner};
+      var data = {"title": req.params.title, "owner": req.body.owner, 
+                  "author": req.body.author, "area": req.body.area};
 
       console.log(req.path);
       console.log(JSON.stringify(req.body));
@@ -261,4 +264,3 @@ router.route('/trade')   // operacoes sobre todos os exemplares
       )
     }
   );
-

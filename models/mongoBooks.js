@@ -8,6 +8,8 @@ var Schema = mongoose.Schema;
 
 var bookSchema = new Schema({
     "owner": String,
+    "author": String,
+    "area": String,
     "title": String
 });
 

@@ -1,30 +1,32 @@
 var frisby = require('frisby');
-frisby.create('testa o metodo get')
-  .get('http://localhost:3000/alunos')
+frisby.create('testa o metodo get dos livros')
+  .get('http://localhost:3000/books')
   .expectStatus(200)
   .expectHeaderContains('Content-Type', 'application/json')
   .expectJSONTypes({
-      alunos: Array
+      books : Array
    })
 .toss();
 
-frisby.create('testa o metodo get com RA')
-  .get('http://localhost:3000/alunos/123456')
+frisby.create('testa o metodo get com titulo do livro')
+  .get('http://localhost:3000/books/Dom Casmurro')
   .expectStatus(200)
   .expectHeaderContains('Content-Type', 'application/json')
   .expectJSONTypes({
-        alunos : [{
-                 ra: String,
-                 nome: String,
-                 curso: String
-  }]})
+      books : [{
+              owner: String,
+              author: String,
+              title: String,
+              area: String
+      }]
+  })
 .toss();
 
-frisby.create('testa o metodo get com RA invalido')
-  .get('http://localhost:3000/alunos/0')
+frisby.create('testa o metodo get com titulo de livro errado')
+  .get('http://localhost:3000/books/A')
   .expectStatus(200)
   .expectHeaderContains('Content-Type', 'application/json')
   .expectJSON({
-      resultado: "aluno inexistente"
+      resultado: "Livro inexistente."
   })
 .toss();

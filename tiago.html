@@ -11,9 +11,12 @@
 <br>
 
 <div ng-app="myApp" ng-controller="myCtrl">
+  Preencha todos os campos abaixo para cadastrar, atualizar ou remover um novo livro: <br><br>
   <form>
     Título: <input type="text" ng-model="titlec"><br><br>
     Proprietário: <input type="text" ng-model="owner"><br><br>
+    Autor: <input type="text" ng-model="author"><br><br>
+    Área: <input type="text" ng-model="area"><br><br>
     <button ng-click="insere()">INSERE</button> &nbsp;
     <button ng-click="atualiza()">ATUALIZA</button> &nbsp;
     <button ng-click="remove()">REMOVE</button> &nbsp;
@@ -35,10 +38,12 @@
   
   <br><br>
   <table cellspacing="8">
-    <tr> <th>{{htitle}}</th>  <th>{{howner}}</th>
+    <tr> <th>{{htitle}}</th>  <th>{{howner}}</th>  <th>{{hauthor}}</th>  <th>{{harea}}</th> <tr>
     <tr ng-repeat="x in books">
       <td>{{ x.title }}</td>
       <td>{{ x.owner }}</td>
+      <td>{{ x.author }}</td>
+      <td>{{ x.area }}</td>
 
     </tr>
   </table>
@@ -51,42 +56,51 @@ var app = angular.module('myApp', []);
 app.controller('myCtrl', function($scope, $http) {
   // ACESSA
   $scope.acessa = function() {
-     var url = "/books";
-     if ($scope.titleb != undefined) url = "/books/" + $scope.titleb;
+    var url = "/books";
+    if ($scope.titleb != undefined) 
+      url = "/books/" + $scope.titleb;
      
-     console.log(url);
-     var request = $http({
+    console.log(url);
+    var request = $http({
                  "method": "get",
                   "url": url});
-     request.success(function(reply) {
-        if(reply.books != null) {
-          $scope.htitle= "Título";
-          $scope.howner = "Proprietário";
-          $scope.mensagem = "Livros Encontrados:";
-          $scope.books = reply.books;
-          } else {
-              $scope.clear();
-              alert(reply.resultado);
-            }
-         }
-      );
-      request.error(function(reply) {
-         alert("Falha na Requisicão!");
+    request.success(function(reply) {
+      if(reply.books != null) {
+        $scope.htitle= "Título";
+        $scope.howner = "Proprietário";
+        $scope.hauthor = "Autor";
+        $scope.harea = "Área";
+        $scope.mensagem = "Livros Encontrados:";
+        $scope.books = reply.books;
+        } else {
+            $scope.clear(true);
+            alert(reply.resultado);
+          }
+     }
+    );
+
+    request.error(function(reply) {
+       alert("Falha na Requisicão!");
       }
     );
   };
 
   // INSERE
   $scope.insere = function() {
-      $scope.clear();
+      $scope.clear(false);
       if ($scope.titlec == undefined || $scope.titlec.length == 0 ||
-          $scope.owner == undefined || $scope.owner.length == 0     ){
-             $scope.clear();
+          $scope.owner == undefined || $scope.owner.length == 0 ||
+          $scope.area == undefined || $scope.area.length == 0 ||
+          $scope.author == undefined || $scope.author.length == 0     ){
+            $scope.clear(false);
             alert("Preencha todos os campos.");
-             return;
+            return;
       }
+
       var data = {"title": $scope.titlec,
-                  "owner": $scope.owner};
+                  "owner": $scope.owner,
+                  "author": $scope.author,
+                  "area": $scope.area};
       
       console.log(data);
 
@@ -94,8 +108,10 @@ app.controller('myCtrl', function($scope, $http) {
                  "method": "post",
                  "url": "/books",
                  "data": data});
+
       request.success(function(reply) {
         alert(reply.resultado);
+        $scope.clear(true);
         }
       );
       request.error(function(reply) {
@@ -106,7 +122,7 @@ app.controller('myCtrl', function($scope, $http) {
 
   // ATUALIZA
   $scope.atualiza = function() {
-     $scope.clear();
+     $scope.clear(false);
      if (($scope.titlec == undefined || $scope.titlec.length == 0)) {
              $scope.clear();
              alert("Preencha o título e pelo menos um campo acima");
@@ -114,6 +130,8 @@ app.controller('myCtrl', function($scope, $http) {
      }
      var data = {"title": $scope.titlec,
                  "owner": $scope.owner,
+                 "author": $scope.author,
+                 "area": $scope.area
                  };
      var request = $http({
                  "method": "put",
@@ -121,6 +139,7 @@ app.controller('myCtrl', function($scope, $http) {
                  "data": data});
      request.success(function(reply) {
          alert(reply.resultado);
+         $scope.clear(true);
          }
       );
       request.error(function(reply) {
@@ -131,17 +150,26 @@ app.controller('myCtrl', function($scope, $http) {
 
   // REMOVE
   $scope.remove = function() {
-     $scope.clear();
+     $scope.clear(false);
      if ($scope.titlec == undefined || $scope.titlec.length == 0) {
          $scope.clear();
          alert("Preencha o título do livro.");
          return;
+     } 
+     else {
+      var decision = confirm("Tem certeza disso?");
+      if(!decision){
+        alert("Operação cancelada.");
+        $scope.clear(true);
+        return;
+      }
      }
      var request = $http({
                  "method": "delete",
                  "url": "/books/" + $scope.titlec});
      request.success(function(reply) {
          alert(reply.resultado);
+         $scope.clear(true);
        }
      );
      request.error(function(reply) {
@@ -151,11 +179,22 @@ app.controller('myCtrl', function($scope, $http) {
    };
 
   // CLEAR
-  $scope.clear = function() {
+  $scope.clear = function(clearAll) {
+    if(clearAll){             // limpa todos os campos
+      $scope.titlec = "";
+      $scope.titleb = "";
+      $scope.owner = "";
+      $scope.area = "";
+      $scope.author = "";
+    }
+
     $scope.books = [];
     $scope.mensagem = "";
     $scope.htitle = $scope.howner = "";
-    }
+    $scope.htitle = $scope.harea = "";
+    $scope.htitle = $scope.hauthor = "";
+  }
+  
   }
 );
 </script> 

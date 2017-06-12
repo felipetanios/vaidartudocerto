@@ -10,10 +10,7 @@ var bodyParser = require('body-parser');
 // adicione "ponteiro" para o MongoDB
 var mongoBooks = require('./models/mongoBooks');
 var mongoTrade = require('./models/mongoTrade'); 
-
-// comente as duas linhas abaixo
-// var index = require('./routes/index');
-// var users = require('./routes/users');
+var mongoCopies = require('./models/mongoCopies'); 
 
 var app = express();
 
@@ -35,10 +32,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 // adicione as duas linhas abaixo
 var router = express.Router();
 app.use('/', router);   // deve vir depois de app.use(bodyParser...
-
-// comente as duas linhas abaixo
-// app.use('/', index);
-// app.use('/users', users);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -79,7 +72,7 @@ router.route('/')
    }
   );
 
-router.route('/books')   // operacoes sobre todos os exemplares
+router.route('/books')   // operacoes sobre todos os livros
   .get(function(req, res) {  // GET
     var response = {};
 
@@ -109,9 +102,10 @@ router.route('/books')   // operacoes sobre todos os exemplares
       
         if (data == null) {
            var db = new mongoBooks();
-           db.owner = req.body.owner;
+           //db.owner = req.body.owner;
            db.title = req.body.title;
            db.author = req.body.author;
+           db.bookID = Math.floor(Math.random() * 5000000000) + 1; 
            db.area = req.body.area;     
 
            db.save(function(erro) {
@@ -165,7 +159,7 @@ router.route('/books/:title')   // operacoes sobre um livro
   .put(function(req, res) {   // PUT (altera)
       var response = {};
       var query = {"title": req.params.title};
-      var data = {"title": req.params.title, "owner": req.body.owner, 
+      var data = {"title": req.params.title, //"owner": req.body.owner, 
                   "author": req.body.author, "area": req.body.area};
 
       console.log(req.path);
@@ -212,6 +206,136 @@ router.route('/books/:title')   // operacoes sobre um livro
     }
   );
 
+/*
+*   OPERAÇÕES SOBRE EXEMPLARES
+*/
+router.route('/copies')   // operacoes sobre os exemplares de um determinado dono
+  .get(function(req, res) {  // GET
+    var response = {"resultado":"Forneça o usuário para acessar seus exemplares."};
+    res.json(response);
+    }
+  )
+  .post(function(req, res) {   // POST (cria)
+     var query = {"title": req.body.title};
+     var response = {};
+
+     console.log(req.path);
+     console.log(JSON.stringify(req.body));
+     console.log(query);
+
+     mongoBooks.findOne(query, function(erro, data) {
+      
+        if (data != null) {
+           var db = new mongoCopies();
+           db.owner = req.body.owner;
+           db.bookID = data.bookID;
+           db.copyID = Math.floor(Math.random() * 10000000000) + 1;     
+
+           db.save(function(erro) {
+             if(erro) {
+                 response = {"resultado": "Falha de inserção no BD."};
+                 res.json(response);
+             } else {
+                 response = {"resultado": "Exemplar inserido corretamente."};
+                 res.json(response);
+              }
+            }
+          )
+        } else {
+            response = {"resultado": "Livro não existente. Para cadastrar um exemplar, cadastre o livro primeiro."};
+            res.json(response);
+          }
+        }
+      )
+    }
+  );
+
+router.route('/copies/:owner')   // operacoes sobre um exemplar
+  .get(function(req, res) {   // GET
+      var response = {};
+      var query = {"owner": req.params.owner};
+
+      console.log(req.path);
+      console.log(JSON.stringify(req.body));
+      console.log(query);
+
+      mongoCopies.findOne(query, function(erro, data) {
+       
+         if(erro) {
+            response = {"resultado": "Falha de acesso ao BD."};
+            res.json(response);
+         } else if (data == null) {
+            response = {"resultado": "Exemplar inexistente."};
+            res.json(response);   
+         } else {
+            response = {"copies": [data]};
+            console.log(response);
+            res.json(response);
+
+          }
+        }
+      )
+    
+      
+    }
+  )
+
+  /*
+  .put(function(req, res) {   // PUT (altera exemplar)
+      var response = {};
+      var query = {"copyID": req.params.copyID};
+      var data = {"onwer": req.params.owner, "bookID": req.body.bookID, "copyID": req.body.copyID};
+
+      console.log(req.path);
+      console.log(JSON.stringify(req.body));
+      console.log(query);
+
+      mongoBooks.findOneAndUpdate(query, data, function(erro, data) {
+          
+          if(erro) {
+            response = {"resultado": "Falha de acesso ao BD!"};
+            res.json(response);
+          } else if (data == null) { 
+             response = {"resultado": "Exemplar inexistente."};
+             res.json(response);   
+          } else {
+             response = {"resultado": "Exemplar atualizado."};
+             res.json(response);   
+    }
+        }
+      )
+    }
+  )
+  */
+
+  .delete(function(req, res) {   // DELETE (remove)
+     var response = {};
+     var query = {"copyID": req.params.copyID};
+
+     console.log(req.path);
+     console.log(JSON.stringify(req.body));
+     console.log(query);
+     mongoCopies.findOneAndRemove(query, function(erro, data) {
+       
+         if(erro) {
+            response = {"resultado": "Falha de acesso ao BD!"};
+            res.json(response);
+         }else if (data == null) {        
+             response = {"resultado": "Exemplar inexistente."};
+             res.json(response);
+            } else {
+              response = {"resultado": "Exemplar removido do seu inventório."};
+              res.json(response);
+             }
+          }
+        )
+    }
+  );
+
+
+/*
+*   OPERAÇÕES DE TROCA
+*/
 router.route('/trade')   // operacoes sobre todos os exemplares
   .get(function(req, res) {  // GET
 

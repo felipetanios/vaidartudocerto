@@ -61,6 +61,17 @@ app.use(function(err, req, res, next) {
 
 module.exports = app;
 
+
+
+function checkAuth(req, res) {
+  cookies = req.cookies;
+  var key = '';
+  if(cookies) key = cookies.EA975;
+  if(key == 'secret') return true;
+  res.json({'resultado': 'Clique em LOGIN para continuar'});
+  return false;
+}
+
 // codigo abaixo adicionado para o processamento das requisições
 // HTTP GET, POST, PUT, DELETE
 
@@ -82,6 +93,7 @@ router.route('/')
 
 router.route('/books')   // operacoes sobre todos os exemplares
  .get(function(req, res) {  // GET
+   if(! checkAuth(req, res)) return;
    var response = {};
 
    console.log(req.path);
@@ -100,6 +112,7 @@ router.route('/books')   // operacoes sobre todos os exemplares
  )
  .post(function(req, res) {   // POST (cria)
     var query = {"title": req.body.title};
+    if(! checkAuth(req, res)) return;
     var response = {};
 
     console.log(req.path);
@@ -135,6 +148,7 @@ router.route('/books')   // operacoes sobre todos os exemplares
 
 router.route('/books/:title')   // operacoes sobre um livro
  .get(function(req, res) {   // GET
+    if(! checkAuth(req, res)) return;
      var response = {};
      var query = {"title": req.params.title};
 
@@ -159,6 +173,7 @@ router.route('/books/:title')   // operacoes sobre um livro
    }
  )
  .put(function(req, res) {   // PUT (altera)
+   if(! checkAuth(req, res)) return;
      var response = {};
      var query = {"title": req.params.title};
      var data = {"title": req.params.title, "owner": req.body.owner};
@@ -184,6 +199,7 @@ router.route('/books/:title')   // operacoes sobre um livro
    }
  )
  .delete(function(req, res) {   // DELETE (remove)
+   if(! checkAuth(req, res)) return;
     var response = {};
     var query = {"title": req.params.title};
 
@@ -208,36 +224,23 @@ router.route('/books/:title')   // operacoes sobre um livro
  );
 
 
-/*--------------USER--------------*/
+/*--------------USER SIGNUP--------------*/
 
- router.route('/users')   // operacoes sobre todos os exemplares
+ router.route('/usersignup')   // operacoes sobre todos os exemplares
 
-  //sign in
+  //abre a página
   .get(function(req, res) {  // GET
-    var response = {};
-    var query = {"user": req.body.user}
-    var pass = {"password": req.body.password}
-    console.log(req.path);
-    console.log(JSON.stringify(req.body));
-
-    mongoUsers.findOne(query, function(erro, data) {
-       if(erro)
-          response = {"resultado": "Falha de acesso ao BD"};
-        else if (data == null){
-          response = {"resultado": "Usuario inexistente"};
-          res.json(response)
-        }else{
-          response = [data];
-
-          res.json(response);
-          }
-        }
-      )
+    var path = 'signup.html';
+    res.header('Cache-Control', 'no-cache');
+    res.sendfile(path, {"root": "./"});
     }
   )
 
   //sign up
   .post(function(req, res) {   // POST (cria)
+    if(checkAuth(req, res)) return;
+    var user = req.body.user;
+    var pass = req.body.password;
      var query = {"user": req.body.user}
      var response = {};
 
@@ -270,3 +273,55 @@ router.route('/books/:title')   // operacoes sobre um livro
       )
     }
   );
+
+
+
+/*--------------USER SIGNIN--------------*/
+
+router.route('/authentication')   // autenticação
+  .get(function(req, res) {  // GET
+     var path = 'auth.html';
+     res.header('Cache-Control', 'no-cache');
+     res.sendfile(path, {"root": "./"});
+     }
+  )
+  .post(function(req, res) {
+     console.log(JSON.stringify(req.body));
+     var user = req.body.user;
+     var pass = req.body.pass;
+     // verifica usuario e senha na base de dados
+     if(user == 'eleri' && pass == 'cardozo') {
+    res.cookie('EA975', 'secret', {'maxAge': 3600000*24*5});
+    res.status(200).send('');  // OK
+      } else {
+    res.status(401).send('');   // unauthorized
+      }
+    }
+  )
+  .delete(function(req, res) {
+     res.clearCookie('EA975');	 // remove cookie no cliente
+     res.json({'resultado': 'Sucesso'});
+     }
+  );
+  //
+  // if(checkAuth(req, res)) return;
+  // var response = {};
+  // var query = {"user": req.body.user}
+  // var pass = {"password": req.body.password}
+  // console.log(req.path);
+  // console.log(JSON.stringify(req.body));
+  //
+  // mongoUsers.findOne(query, function(erro, data) {
+  //    if(erro)
+  //       response = {"resultado": "Falha de acesso ao BD"};
+  //     else if (data == null){
+  //       response = {"resultado": "Usuario inexistente"};
+  //       res.json(response)
+  //     }else{
+  //       response = [data];
+  //
+  //       res.json(response);
+  //       }
+  //     }
+  //   )
+  // }

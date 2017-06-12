@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset-UTF-8" />
+</head>
+<body>
+
+<h1>Cadastro de Usuários</h1>
+
+<br>
+
+<div ng-app="myApp" ng-controller="myCtrl">
+  Preencha todos os campos abaixo para se cadastrar<br><br>
+  <form>
+    Nome de Usuário <input type="text" ng-model="username"><br><br>
+    Senha: <input type="password" ng-model="pass"><br><br>
+    <button ng-click="cadastraUser()">CADASTRA</button> &nbsp;
+    <button ng-click="windowClose()">VOLTAR</button> &nbsp;
+  </form>
+
+</div>
+
+
+<script>
+var app = angular.module('myApp', []);
+app.controller('myCtrl', function($scope, $http) {
+  // Cadastra usuario
+  $scope.cadastraUser = function() {
+      $scope.clear(false);
+      if ($scope.username == undefined || $scope.username.length == 0 ||
+          $scope.pass == undefined || $scope.pass.length == 0 ||){
+            $scope.clear(false);
+            alert("Preencha todos os campos.");
+            return;
+      }
+
+      var data = {"user": $scope.username,
+                  "password": $scope.pass};
+
+      console.log(data);
+
+      var request = $http({
+                 "method": "post",
+                 "url": "/usersignup",
+                 "data": data});
+
+      request.success(function(reply) {
+        alert(reply.resultado);
+        $scope.clear(true);
+        }
+      );
+      request.error(function(reply) {
+        alert("Falha na Requisição!");
+      }
+    );
+  }
+
+  $scope.windowClose = function() {
+    signupwindow.close();
+  };
+);
+</script>
+
+</body>
+</html>

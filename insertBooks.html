@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset-UTF-8" />
+</head>
+<body>
+
+<h1>Cadastro de Livros</h1>
+
+<br>
+
+<div ng-app="myApp" ng-controller="myCtrl">
+  Preencha todos os campos abaixo para cadastrar ou atualizar um livro: <br><br>
+  <form>
+    Título: <input type="text" ng-model="titlec"><br><br>
+    Autor: <input type="text" ng-model="author"><br><br>
+    Área: <input type="text" ng-model="area"><br><br>
+    <button ng-click="insere()">INSERE</button> &nbsp;
+    <!--<button ng-click="atualiza()">ATUALIZA</button> &nbsp;-->
+    
+  </form>
+
+<br><br>
+
+
+<script>
+var app = angular.module('myApp', []);
+app.controller('myCtrl', function($scope, $http) {
+  
+  // INSERE
+  $scope.insere = function() {
+      if ($scope.titlec == undefined || $scope.titlec.length == 0 ||
+          $scope.area == undefined || $scope.area.length == 0 ||
+          $scope.author == undefined || $scope.author.length == 0 ){
+            alert("Preencha todos os campos.");
+            return;
+      }
+
+      var data = {"title": $scope.titlec,
+                  "author": $scope.author,
+                  "area": $scope.area,
+                  
+                };
+      
+      console.log(data);
+
+      var request = $http({
+                 "method": "post",
+                 "url": "/books",
+                 "data": data});
+
+      request.success(function(reply) {
+        alert(reply.resultado);
+        $scope.clear();
+        }
+      );
+      request.error(function(reply) {
+        alert("Falha na Requisição!");
+      }
+    );
+  };
+
+  // ATUALIZA
+  $scope.atualiza = function() {
+     if (($scope.titlec == undefined || $scope.titlec.length == 0)) {
+             $scope.clear();
+             alert("Preencha o título e pelo menos um campo acima");
+             return;
+     }
+     var data = {"title": $scope.titlec,
+                 "author": $scope.author,
+                 "area": $scope.area,
+
+                 };
+     var request = $http({
+                 "method": "put",
+                 "url": "/books/" + $scope.titlec,
+                 "data": data});
+     request.success(function(reply) {
+         alert(reply.resultado);
+         $scope.clear();
+         }
+      );
+      request.error(function(reply) {
+        alert("Falha na Requisição!");
+       }
+    );
+  };
+
+
+  // CLEAR
+  $scope.clear = function() {
+    $scope.titlec = "";
+    $scope.area = "";
+    $scope.author = "";
+    
+  }
+  
+  }
+);
+</script> 
+
+</body>
+</html>

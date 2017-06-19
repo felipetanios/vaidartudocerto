@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset-UTF-8" />
+</head>
+<body>
+
+<h1>Busca de Exemplares</h1>
+
+<br>
+
+<div ng-app="myApp" ng-controller="myCtrl">
+  <form>
+    Título: <input type="text" ng-model="titleb"> 
+    <button ng-click="acessa()">BUSCA</button> &nbsp;
+  </form>
+
+  <br><br>
+  Quer cadastrar um <b>novo livro</b>? Então <a href="insertBooks.html">clique aqui</a>.
+
+  <br><br><br>
+  <b>{{mensagem}}</b>
+  
+  <br><br>
+  <table cellspacing="8">
+    <tr> <th>{{htitle}}</th>  <th>{{hauthor}}</th>  <th>{{harea}}</th> <th>{{havailable}}</th> </tr> 
+    <tr ng-repeat="x in books">
+      <td>{{ x.title }}</td>
+      <td>{{ x.author }}</td>
+      <td>{{ x.area }}</td>
+      <td>{{ x.nCopies }}</td>
+
+    </tr>
+  </table>
+
+</div>
+
+
+<script>
+var app = angular.module('myApp', []);
+app.controller('myCtrl', function($scope, $http) {
+  // ACESSA
+  $scope.acessa = function() {
+    var url = "/books";
+    if ($scope.titleb != undefined) 
+      url = "/books/" + $scope.titleb;
+     
+    console.log(url);
+    var request = $http({
+                 "method": "get",
+                  "url": url});
+    request.success(function(reply) {
+      if(reply.books != null) {
+        $scope.htitle= "Título";
+        $scope.hauthor = "Autor";
+        $scope.harea = "Área";
+        $scope.mensagem = "Livros Encontrados:";
+        $scope.books = reply.books;
+
+        $scope.havailable = "Nº de Exemplares";
+
+        } else {           
+            $scope.clear();
+            alert(reply.resultado);
+          }
+      
+     }
+    );
+
+    request.error(function(reply) {
+       alert("Falha na Requisicão!");
+      }
+    );
+  };
+
+  // CLEAR
+  $scope.clear = function() {
+    $scope.titleb = "";
+    $scope.books = [];
+    $scope.mensagem = "";
+
+    $scope.htitle = $scope.howner = "";
+    $scope.htitle = $scope.harea = "";
+    $scope.htitle = $scope.hauthor = "";
+    $scope.htitle = $scope.havailable = "";
+  }
+  
+  }
+);
+</script> 
+
+</body>
+</html>

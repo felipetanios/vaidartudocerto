@@ -11,7 +11,8 @@ var bookSchema = new Schema({
     "author": String,
     "area": String,
     "bookID": Number,
-    "title": String
+    "title": String,
+    "nCopies": Number
 });
 
 module.exports = conn1.model('books', bookSchema);

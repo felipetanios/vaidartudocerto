@@ -106,7 +106,8 @@ router.route('/books')   // operacoes sobre todos os livros
            db.title = req.body.title;
            db.author = req.body.author;
            db.bookID = Math.floor(Math.random() * 5000000000) + 1; 
-           db.area = req.body.area;     
+           db.area = req.body.area; 
+           db.nCopies = 0;    
 
            db.save(function(erro) {
              if(erro) {
@@ -159,7 +160,7 @@ router.route('/books/:title')   // operacoes sobre um livro
   .put(function(req, res) {   // PUT (altera)
       var response = {};
       var query = {"title": req.params.title};
-      var data = {"title": req.params.title, //"owner": req.body.owner, 
+      var data = {"title": req.params.title, "nCopies": req.params.nCopies, //"owner": req.body.owner, 
                   "author": req.body.author, "area": req.body.area};
 
       console.log(req.path);
@@ -177,7 +178,7 @@ router.route('/books/:title')   // operacoes sobre um livro
           } else {
              response = {"resultado": "Livro atualizado."};
              res.json(response);   
-    }
+          }
         }
       )
     }
@@ -229,6 +230,7 @@ router.route('/copies')   // operacoes sobre os exemplares de um determinado don
            var db = new mongoCopies();
            db.owner = req.body.owner;
            db.bookID = data.bookID;
+           // gera id do exemplar 
            db.copyID = Math.floor(Math.random() * 10000000000) + 1;     
 
            db.save(function(erro) {
@@ -241,12 +243,49 @@ router.route('/copies')   // operacoes sobre os exemplares de um determinado don
               }
             }
           )
+
+          // atualiza número de exemplares do livro disponiveis
+          var nCopies = data.nCopies + 1;
+          var data = {"nCopies": nCopies}
+
+          mongoBooks.findOneAndUpdate(query, data, function(erro, data) {
+              
+              if(erro) {
+                response = {"resultado": "Falha de acesso ao BD!"};
+                res.json(response);
+              }
+            }
+          )
+
         } else {
             response = {"resultado": "Livro não existente. Para cadastrar um exemplar, cadastre o livro primeiro."};
             res.json(response);
           }
         }
       )
+    }
+  )
+  .delete(function(req, res) {   // DELETE (remove)
+     var response = {};
+     var query = {"copyID": req.params.copyID};
+
+     console.log(req.path);
+     console.log(JSON.stringify(req.body));
+     console.log(query);
+     mongoCopies.findOneAndRemove(query, function(erro, data) {
+       
+         if(erro) {
+            response = {"resultado": "Falha de acesso ao BD!"};
+            res.json(response);
+         }else if (data == null) {        
+             response = {"resultado": "Exemplar inexistente."};
+             res.json(response);
+            } else {
+              response = {"resultado": "Exemplar removido do seu inventório."};
+              res.json(response);
+             }
+          }
+        )
     }
   );
 
@@ -278,7 +317,7 @@ router.route('/copies/:owner')   // operacoes sobre um exemplar
     
       
     }
-  )
+  );
 
   /*
   .put(function(req, res) {   // PUT (altera exemplar)
@@ -307,30 +346,6 @@ router.route('/copies/:owner')   // operacoes sobre um exemplar
     }
   )
   */
-
-  .delete(function(req, res) {   // DELETE (remove)
-     var response = {};
-     var query = {"copyID": req.params.copyID};
-
-     console.log(req.path);
-     console.log(JSON.stringify(req.body));
-     console.log(query);
-     mongoCopies.findOneAndRemove(query, function(erro, data) {
-       
-         if(erro) {
-            response = {"resultado": "Falha de acesso ao BD!"};
-            res.json(response);
-         }else if (data == null) {        
-             response = {"resultado": "Exemplar inexistente."};
-             res.json(response);
-            } else {
-              response = {"resultado": "Exemplar removido do seu inventório."};
-              res.json(response);
-             }
-          }
-        )
-    }
-  );
 
 
 /*

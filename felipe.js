@@ -112,7 +112,7 @@ router.route('/books')   // operacoes sobre todos os exemplares
  )
  .post(function(req, res) {   // POST (cria)
     var query = {"title": req.body.title};
-    if(! checkAuth(req, res)) return;
+    //if(! checkAuth(req, res)) return;
     var response = {};
 
     console.log(req.path);
@@ -226,54 +226,50 @@ router.route('/books/:title')   // operacoes sobre um livro
 
 /*--------------USER SIGNUP--------------*/
 
- router.route('/usersignup')   // operacoes sobre todos os exemplares
-
+router.route('/usersignup')   // operacoes sobre todos os exemplares
   //abre a página
   .get(function(req, res) {  // GET
     var path = 'signup.html';
     res.header('Cache-Control', 'no-cache');
     res.sendfile(path, {"root": "./"});
-    }
+  }
   )
 
-  //sign up
-  .post(function(req, res) {   // POST (cria)
-    if(checkAuth(req, res)) return;
-    var user = req.body.user;
-    var pass = req.body.password;
-     var query = {"user": req.body.user}
-     var response = {};
+    //sign up
+    .post(function(req, res) {   // POST (cria)
+    //if(checkAuth(req, res)) return;
+      console.log(JSON.stringify(req.body));
+      var user = req.body.user;
+      var pass = req.body.password;
+      var query = {"user": user}
+      var response = {};
 
-     console.log(req.path);
-     console.log(JSON.stringify(req.body));
-     console.log(query);
+      mongoUsers.findOne(query, function(erro, data) {
+        console.log(data);
 
-     mongoUsers.findOne(query, function(erro, data) {
+         if (data == null) {
+            var db = new mongoUsers();
+            db.user =  req.body.user;
+            db.password = req.body.password;
 
-        if (data == null) {
-           var db = new mongoUsers();
-           db.user = req.body.user;
-           db.password = req.body.password;
-
-           db.save(function(erro) {
-             if(erro) {
-                 response = {"resultado": "Falha de insercao no BD"};
-                 res.json(response);
-             } else {
-                 response = {"resultado": "Usuario cadastrado"};
-                 res.json(response);
-              }
-            }
-          )
-        } else {
-            response = {"resultado": "Usuario ja existente"};
-            res.json(response);
-          }
-        }
-      )
+            db.save(function(erro) {
+              if(erro) {
+                  response = {"resultado": "Falha de cadastro do usuario"};
+                  res.json(response);
+              } else {
+                  response = {"resultado": "Usuario cadastrado"};
+                  res.json(response);
+               }
+             }
+           )
+         } else {
+             response = {"resultado": "Usuario ja existente"};
+             res.json(response);
+           }
+         }
+       )
     }
-  );
-
+    );
 
 
 /*--------------USER SIGNIN--------------*/
@@ -288,40 +284,38 @@ router.route('/authentication')   // autenticação
   .post(function(req, res) {
      console.log(JSON.stringify(req.body));
      var user = req.body.user;
-     var pass = req.body.pass;
+     var pass = req.body.password;
+     var query = {"user": user}
+
+
+     console.log(pass);
+     console.log(req.body.password);
+
      // verifica usuario e senha na base de dados
-     if(user == 'eleri' && pass == 'cardozo') {
-    res.cookie('EA975', 'secret', {'maxAge': 3600000*24*5});
-    res.status(200).send('');  // OK
-      } else {
-    res.status(401).send('');   // unauthorized
-      }
+     mongoUsers.findOne(query, function(erro, data) {
+       console.log(data);
+       console.log(data.password);
+
+        if (data == null) {
+          response = {"resultado": "Usuario nao existente"};
+          res.json(response);
+        } else {
+            if(data.password == pass){
+              res.cookie('EA975', 'secret', {'maxAge': 3600000*24*5});
+              response = {"resultado": "Usuario logado com sucesso"};
+              res.json(response);
+            }else{
+              response = {"resultado": "Usuario ou senha inválidos"};
+              res.json(response);
+            }
+          }
+        }
+      )
     }
   )
+
   .delete(function(req, res) {
      res.clearCookie('EA975');	 // remove cookie no cliente
      res.json({'resultado': 'Sucesso'});
      }
   );
-  //
-  // if(checkAuth(req, res)) return;
-  // var response = {};
-  // var query = {"user": req.body.user}
-  // var pass = {"password": req.body.password}
-  // console.log(req.path);
-  // console.log(JSON.stringify(req.body));
-  //
-  // mongoUsers.findOne(query, function(erro, data) {
-  //    if(erro)
-  //       response = {"resultado": "Falha de acesso ao BD"};
-  //     else if (data == null){
-  //       response = {"resultado": "Usuario inexistente"};
-  //       res.json(response)
-  //     }else{
-  //       response = [data];
-  //
-  //       res.json(response);
-  //       }
-  //     }
-  //   )
-  // }

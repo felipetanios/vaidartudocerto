@@ -1,33 +1,52 @@
 <!DOCTYPE html>
 <html>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset-UTF-8" />
+</head>
 <body>
 
-<h1>Cadastro de Alunos</h1>
+<h1>Cadastro de Livros</h1>
 
 <br>
 
 <div ng-app="myApp" ng-controller="myCtrl">
+  Preencha todos os campos abaixo para cadastrar, atualizar ou remover um novo livro: <br><br>
   <form>
-    RA: <input type="text" ng-model="ra"><br><br>
-    Nome: <input type="text" ng-model="nome"><br><br>
-    Curso: <input type="text" ng-model="curso"><br><br>
-    <button ng-click="acessa()">ACESSA</button> &nbsp;
+    <button ng-click="signup()">CADASTRAR</button>&nbsp;&nbsp;
+    <button ng-click="login()">ENTRAR</button>&nbsp;&nbsp;<br>
+    Título: <input type="text" ng-model="titlec"><br><br>
+    Proprietário: <input type="text" ng-model="owner"><br><br>
+    Autor: <input type="text" ng-model="author"><br><br>
+    Área: <input type="text" ng-model="area"><br><br>
     <button ng-click="insere()">INSERE</button> &nbsp;
     <button ng-click="atualiza()">ATUALIZA</button> &nbsp;
     <button ng-click="remove()">REMOVE</button> &nbsp;
   </form>
 
+<br><br>
+
+<h1>Busca de Livros</h1>
+
+<br>
+
+  <form>
+    Título: <input type="text" ng-model="titleb"><br><br>
+    <button ng-click="acessa()">BUSCA</button> &nbsp;
+  </form>
+
   <br><br>
-  Resultado: {{mensagem}}
-  
+  {{mensagem}}
+
   <br><br>
   <table cellspacing="8">
-    <tr> <th>{{hra}}</th>  <th>{{hnome}}</th>  <th>{{hcurso}}</th> </tr>
-    <tr ng-repeat="x in alunos">
-      <td>{{ x.ra }}</td>
-      <td>{{ x.nome }}</td>
-      <td>{{ x.curso }}</td>
+    <tr> <th>{{htitle}}</th>  <th>{{howner}}</th>  <th>{{hauthor}}</th>  <th>{{harea}}</th> <tr>
+    <tr ng-repeat="x in books">
+      <td>{{ x.title }}</td>
+      <td>{{ x.owner }}</td>
+      <td>{{ x.author }}</td>
+      <td>{{ x.area }}</td>
+
     </tr>
   </table>
 
@@ -37,116 +56,159 @@
 <script>
 var app = angular.module('myApp', []);
 app.controller('myCtrl', function($scope, $http) {
+  //SIGN UP
+  $scope.signup = function() {
+    signupwindow = window.open("/usersignup", "_blank");
+  }
+  //LOGIN
+  $scope.login = function() {
+    signupwindow = window.open("/authentication", "_blank");
+  }
+
   // ACESSA
   $scope.acessa = function() {
-     var url = "/alunos";
-     if ($scope.ra != undefined) url = "/alunos/" + $scope.ra;
-     var request = $http({
+    var url = "/books";
+    if ($scope.titleb != undefined)
+      url = "/books/" + $scope.titleb;
+
+    console.log(url);
+    var request = $http({
                  "method": "get",
                   "url": url});
-     request.success(function(reply) {
-        if(reply.alunos != null) {
-          $scope.hra = "RA";
-          $scope.hnome = "Aluno";
-          $scope.hcurso = "Curso";
-          $scope.mensagem = "";
-          $scope.alunos = reply.alunos;
-          } else {
-              $scope.clear();
-              $scope.mensagem = reply.resultado;
-            }
-         }
-      );
-      request.error(function(reply) {
-         alert("Falha na requisicao");
+    request.success(function(reply) {
+      if(reply.books != null) {
+        $scope.htitle= "Título";
+        $scope.howner = "Proprietário";
+        $scope.hauthor = "Autor";
+        $scope.harea = "Área";
+        $scope.mensagem = "Livros Encontrados:";
+        $scope.books = reply.books;
+        } else {
+            $scope.clear(true);
+            alert(reply.resultado);
+          }
+     }
+    );
+
+    request.error(function(reply) {
+       alert("Falha na Requisicão!");
       }
     );
   };
 
   // INSERE
   $scope.insere = function() {
-      $scope.clear();
-      if ($scope.ra == undefined || $scope.ra.length == 0 ||
-          $scope.nome == undefined || $scope.nome.length == 0 ||
-          $scope.curso == undefined || $scope.curso.length == 0) {
-             $scope.clear();
-             $scope.mensagem = "preencha todos os campos acima";
-             return;
+      $scope.clear(false);
+      if ($scope.titlec == undefined || $scope.titlec.length == 0 ||
+          $scope.owner == undefined || $scope.owner.length == 0 ||
+          $scope.area == undefined || $scope.area.length == 0 ||
+          $scope.author == undefined || $scope.author.length == 0     ){
+            $scope.clear(false);
+            alert("Preencha todos os campos.");
+            return;
       }
-      var data = {"ra": $scope.ra,
-                  "nome": $scope.nome,
-                  "curso": $scope.curso};
+
+      var data = {"title": $scope.titlec,
+                  "owner": $scope.owner,
+                  "author": $scope.author,
+                  "area": $scope.area};
+
+      console.log(data);
+
       var request = $http({
                  "method": "post",
-                 "url": "/alunos",
+                 "url": "/books",
                  "data": data});
+
       request.success(function(reply) {
-        $scope.mensagem = reply.resultado;
+        alert(reply.resultado);
+        $scope.clear(true);
         }
       );
       request.error(function(reply) {
-        alert("Falha na requisicao");
+        alert("Falha na Requisição!");
       }
     );
   };
 
   // ATUALIZA
   $scope.atualiza = function() {
-     $scope.clear();
-     if (($scope.ra == undefined || $scope.ra.length == 0) ||
-         ($scope.nome == undefined || $scope.nome.length == 0) &&
-         ($scope.curso == undefined || $scope.curso.length == 0)) {
+     $scope.clear(false);
+     if (($scope.titlec == undefined || $scope.titlec.length == 0)) {
              $scope.clear();
-             $scope.mensagem = "preencha  RA e pelo menos um campo acima";
+             alert("Preencha o título e pelo menos um campo acima");
              return;
      }
-     var data = {"ra": $scope.ra,
-                 "nome": $scope.nome,
-                 "curso": $scope.curso};
+     var data = {"title": $scope.titlec,
+                 "owner": $scope.owner,
+                 "author": $scope.author,
+                 "area": $scope.area
+                 };
      var request = $http({
                  "method": "put",
-                 "url": "/alunos/" + $scope.ra,
+                 "url": "/books/" + $scope.titlec,
                  "data": data});
      request.success(function(reply) {
-         $scope.mensagem = reply.resultado;
+         alert(reply.resultado);
+         $scope.clear(true);
          }
       );
       request.error(function(reply) {
-        alert("Falha na requisicao");
+        alert("Falha na Requisição!");
        }
     );
   };
 
   // REMOVE
   $scope.remove = function() {
-     $scope.clear();
-     if ($scope.ra == undefined || $scope.ra.length == 0) {
+     $scope.clear(false);
+     if ($scope.titlec == undefined || $scope.titlec.length == 0) {
          $scope.clear();
-         $scope.mensagem = "preencha o RA do aluno";
+         alert("Preencha o título do livro.");
          return;
+     }
+     else {
+      var decision = confirm("Tem certeza disso?");
+      if(!decision){
+        alert("Operação cancelada.");
+        $scope.clear(true);
+        return;
+      }
      }
      var request = $http({
                  "method": "delete",
-                 "url": "/alunos/" + $scope.ra});
+                 "url": "/books/" + $scope.titlec});
      request.success(function(reply) {
-         $scope.mensagem = reply.resultado;
+         alert(reply.resultado);
+         $scope.clear(true);
        }
      );
      request.error(function(reply) {
-        alert("Falha na requisicao");
+        alert("Falha na Requisição!");
        }
      );
    };
 
   // CLEAR
-  $scope.clear = function() {
-    $scope.alunos = [];
-    $scope.mensagem = "";
-    $scope.hra = $scope.hnome = $scope.hcurso = "";
+  $scope.clear = function(clearAll) {
+    if(clearAll){             // limpa todos os campos
+      $scope.titlec = "";
+      $scope.titleb = "";
+      $scope.owner = "";
+      $scope.area = "";
+      $scope.author = "";
     }
+
+    $scope.books = [];
+    $scope.mensagem = "";
+    $scope.htitle = $scope.howner = "";
+    $scope.htitle = $scope.harea = "";
+    $scope.htitle = $scope.hauthor = "";
+  }
+
   }
 );
-</script> 
+</script>
 
 </body>
 </html>

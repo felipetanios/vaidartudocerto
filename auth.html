@@ -5,14 +5,15 @@
   <meta http-equiv="Content-Type" content="text/html; charset-UTF-8" />
 </head>
 <body>
-  <h2>Cadastro de Usuários</h2>
+  <h2>Autenticação de Usuários</h2>
 
 <br>
 <div ng-app="myApp" ng-controller="myCtrl">
   <form>
     Usuário: <input type="text" ng-model="user"><br><br>
     Senha: <input type="password" ng-model="pass"><br><br>
-    <button ng-click="doPost()">Cadastra</button><br><br>
+    <button ng-click="doPost()">Log In</button>&nbsp;&nbsp;
+    <button ng-click="doDelete()">Log out</button>&nbsp;&nbsp;<br>
   </form>
 </div>
 
@@ -33,7 +34,7 @@ app.controller('myCtrl', function($scope, $http) {
      $scope.result = data;
      var request = $http({
                  "method": "post",
-                 "url": "/usersignup",
+                 "url": "/authentication",
                  "data": data});
      request.success(function(reply, status) {
         alert(reply.resultado);
@@ -46,6 +47,26 @@ app.controller('myCtrl', function($scope, $http) {
        }
      );
    };
+
+   // DELETE
+   $scope.doDelete = function() {
+
+      var data = {};
+      var request = $http({
+                  "method": "delete",
+                  "url": "/authentication",
+                  "data": data});
+      request.success(function(reply, status) {
+         alert(reply.resultado);
+         $scope.clear(true);
+         }
+       );
+       request.error(function(reply, status) {
+         alert(reply.resultado);
+         $scope.clear(true);
+        }
+      );
+    };
 
   // CLEAR
   $scope.clear = function(clearAll) {

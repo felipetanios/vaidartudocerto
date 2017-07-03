@@ -12,7 +12,8 @@
   <form>
     Usuário: <input type="text" ng-model="user"><br><br>
     Senha: <input type="password" ng-model="pass"><br><br>
-    <button ng-click="doPost()">Cadastra</button><br><br>
+    <button ng-click="doPost()">Cadastrar</button>&nbsp;&nbsp;
+    <button ng-click="doDelete()">Remover usuário</button>&nbsp;&nbsp;
   </form>
 </div>
 
@@ -46,6 +47,25 @@ app.controller('myCtrl', function($scope, $http) {
        }
      );
    };
+
+   $scope.doDelete = function() {
+     var decision = confirm("Você tem certeza que deseja excluir seu usuário");
+     if (decision){
+       var request = $http({
+                   "method": "delete",
+                   "url": "/usersignup",
+                   "data": {}});
+       request.success(function(reply, status) {
+          alert(reply.resultado);
+          }
+        );
+        request.error(function(reply, status) {
+          alert(reply.resultado);
+         }
+       );
+     };
+     }
+
 
   // CLEAR
   $scope.clear = function(clearAll) {

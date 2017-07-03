@@ -67,9 +67,16 @@ function checkAuth(req, res) {
   cookies = req.cookies;
   var key = '';
   if(cookies) key = cookies.EA975;
-  if(key == 'secret') return true;
+  if(key != '') return true;
   res.json({'resultado': 'Clique em LOGIN para continuar'});
   return false;
+}
+
+function returnUser(req,res){
+  cookies = req.cookies;
+  var key = '';
+  if(cookies) key = cookies.EA975;
+  return key
 }
 
 // codigo abaixo adicionado para o processamento das requisições
@@ -112,7 +119,7 @@ router.route('/books')   // operacoes sobre todos os exemplares
  )
  .post(function(req, res) {   // POST (cria)
     var query = {"title": req.body.title};
-    //if(! checkAuth(req, res)) return;
+    if(! checkAuth(req, res)) return;
     var response = {};
 
     console.log(req.path);
@@ -269,6 +276,30 @@ router.route('/usersignup')   // operacoes sobre todos os exemplares
          }
        )
     }
+    )
+
+    //Remove usuario
+    .delete(function(req, res) {   // POST (cria)
+    if(!checkAuth(req, res)) return;
+    user = returnUser(req, res);
+    console.log (user);
+      var query = {"user": user}
+      var response = {};
+
+      mongoUsers.findOneAndRemove(query, function(erro, data) {
+          if(erro) {
+             response = {"resultado": "falha de acesso ao DB"};
+             res.json(response);
+          }else if (data == null) {
+              response = {"resultado": "Usuario inexistente"};
+              res.json(response);
+             } else {
+               response = {"resultado": "Usuario removido"};
+               res.json(response);
+              }
+           }
+         )
+    }
     );
 
 
@@ -301,7 +332,7 @@ router.route('/authentication')   // autenticação
           res.json(response);
         } else {
             if(data.password == pass){
-              res.cookie('EA975', 'secret', {'maxAge': 3600000*24*5});
+              res.cookie('EA975', user, {'maxAge': 3600000*24*5});
               response = {"resultado": "Usuario logado com sucesso"};
               res.json(response);
             }else{
@@ -315,6 +346,7 @@ router.route('/authentication')   // autenticação
   )
 
   .delete(function(req, res) {
+      if(! checkAuth(req, res)) return;
      res.clearCookie('EA975');	 // remove cookie no cliente
      res.json({'resultado': 'Sucesso'});
      }

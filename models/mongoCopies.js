@@ -10,7 +10,6 @@ var copiesSchema = new Schema({
     "owner": String,
     "bookID": Number,
     "copyID": Number
-    //"book": {type: mongoose.Schema.Types.ObjectID, ref: "title"}
 
 });
 

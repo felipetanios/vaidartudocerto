@@ -73,7 +73,7 @@ router.route('/')
   );
 
 router.route('/books')   // operacoes sobre todos os livros
-  .get(function(req, res) {  // GET
+  /*.get(function(req, res) {  // GET
     var response = {};
 
     console.log(req.path);
@@ -89,7 +89,39 @@ router.route('/books')   // operacoes sobre todos os livros
         }
       )
     }
+  )*/
+
+  .get(function(req, res) {   // GET
+      var response = {};
+      var query = {"bookIDs": req.body.bookID};
+
+      console.log(req.path);
+      console.log(JSON.stringify(req.body));
+      console.log(query);
+      console.log("oi");
+
+
+      mongoBooks.find(query, function(erro, data) {
+       
+         if(erro) {
+            response = {"resultado": "Falha de acesso ao BD."};
+            res.json(response);
+         } else if (data == null) {
+            response = {"resultado": "Livro inexistente."};
+            res.json(response);   
+         } else {
+            response = {"books": data};
+            console.log(response);
+            res.json(response);
+
+          }
+        }
+      )
+    
+      
+    }
   )
+
   .post(function(req, res) {   // POST (cria)
      var query = {"title": req.body.title};
      var response = {};
@@ -118,7 +150,8 @@ router.route('/books')   // operacoes sobre todos os livros
                  res.json(response);
               }
             }
-          )
+          );
+
         } else {
             response = {"resultado": "Livro já existente."};
             res.json(response);
@@ -207,35 +240,6 @@ router.route('/books/:title')   // operacoes sobre um livro
     }
   );
 
-router.route('/books/id/:bookID')   // operacoes sobre um livro
-  .get(function(req, res) {   // GET
-      var response = {};
-      var query = {"bookID": req.params.bookID};
-
-      console.log(req.path);
-      console.log(JSON.stringify(req.body));
-      console.log(query);
-
-      mongoBooks.findOne(query, function(erro, data) {
-       
-         if(erro) {
-            response = {"resultado": "Falha de acesso ao BD."};
-            res.json(response);
-         } else if (data == null) {
-            response = {"resultado": "Livro inexistente."};
-            res.json(response);   
-         } else {
-            response = {"books": data};
-            console.log(response);
-            res.json(response);
-
-          }
-        }
-      )
-    
-      
-    }
-  );
 
 /*
 *   OPERAÇÕES SOBRE EXEMPLARES
@@ -274,6 +278,13 @@ router.route('/copies')   // operacoes sobre os exemplares de um determinado don
             }
           )
 
+          mongoCopies.findOne({bookID: data.bookID}).
+            populate('book').
+            exec(function (err, story) {
+              if (err) return handleError(err);
+              console.log(data.bookID);
+            });
+
           // atualiza número de exemplares do livro disponiveis
           var nCopies = data.nCopies + 1;
           var data = {"nCopies": nCopies}
@@ -285,7 +296,8 @@ router.route('/copies')   // operacoes sobre os exemplares de um determinado don
                 res.json(response);
               }
             }
-          )
+          );
+
 
         } else {
             response = {"resultado": "Livro não existente. Para cadastrar um exemplar, cadastre o livro primeiro."};

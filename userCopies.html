@@ -65,29 +65,31 @@ app.controller('myCtrl', function($scope, $http) {
         }
         console.log(booksIDs);
  
-       for(b = 0; b < booksIDs.length; b++){
-          url = "/books/id/" + booksIDs[b];
-          request = $http({
-                 "method": "get",
-                  "url": url});
+       
+        url = "/books";
+        var data = {"booksIDs": booksIDs}
+        request = $http({
+               "method": "get",
+                "url": url,
+                "data": data});
 
-          request.success(function(reply){
-            $scope.books = []
-            if(reply.books != null){
-              $scope.books.push(reply.books);
-              console.log($scope.books);
-            } 
-            else {
-              alert(reply.resultado);
-            }
+        request.success(function(reply){
+         
+          if(reply.books != null){
+            $scope.books = reply.books;
+            console.log($scope.books);
+          } 
+          else {
+            alert(reply.resultado);
+          }
             
           }
-          );
+        );
 
           $scope.htitle= "Título";
           $scope.hauthor = "Autor";
           $scope.harea = "Área";
-        }
+        
       } else {
           $scope.clear();
           alert(reply.resultado);

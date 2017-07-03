@@ -6,15 +6,14 @@
 </head>
 <body>
 
-<div ng-app="myApp" ng-controller="myCtrl">
-
 <h1>Meus Livros</h1>
 
-<br>
-  
-  <br><br>
+<div ng-app="myApp" ng-controller="myCtrl">
+
+<button ng-click="show()">Mostre meus livros!</button> &nbsp;
+<br><br>
   <table cellspacing="8">
-    <tr> <th>{{htitle}}</th>  <th>{{hauthor}}</th>  <th>{{harea}}</th> <tr>
+    <tr> <th>{{htitle}}</th>  <th>{{hauthor}}</th>  <th>{{harea}}</th> </tr>
     <tr ng-repeat="x in books">
       <td>{{ x.title }}</td>
       <td>{{ x.author }}</td>
@@ -26,10 +25,11 @@
   
   <h1>Novos Exemplares</h1>
   
-  Forneça o título de um livro para cadastrar um novo exemplar: <br><br>
+  Forneça o título de um livro para cadastrar um novo exemplar ou deletar um já existente: <br><br>
   <form>
     Título: <input type="text" ng-model="titlec"> 
     <button ng-click="insere()">INSERE</button> &nbsp;
+    <button ng-click="remove()">DELETE</button> &nbsp;
     
   </form>
   <br><br>
@@ -42,27 +42,56 @@
 <script>
 var app = angular.module('myApp', []);
 app.controller('myCtrl', function($scope, $http) {
-  // ACESSA
-  /*$scope.acessa = function() {
+
+ $scope.show = function() {
+
+    console.log("Aqui");
     var url = "/copies";
-    if ($scope.titleb != undefined) 
-      url = "/copies/" + "Pablo"; // ATENÇÃO: SUBSTITUIR PELO USUARIO LOGADO
     
-    $scope.books = ""; 
+    url = "/copies/" + "Pablo"; // ATENÇÃO: SUBSTITUIR PELO USUARIO LOGADO
 
     var request = $http({
                  "method": "get",
                   "url": url});
+
     request.success(function(reply) {
-      if(reply.books != null) {
-        $scope.htitle= "Título";
-        $scope.hauthor = "Autor";
-        $scope.harea = "Área";
-        $scope.books += reply.books;
-        } else {
-            $scope.clear(true);
-            alert(reply.resultado);
+      var booksIDs = [];
+
+      if(reply.copies != null) {
+        
+       for(c in reply.copies[0]){
+          booksIDs.push(reply.copies[0][c].bookID);
+        
+        }
+        console.log(booksIDs);
+ 
+       for(b = 0; b < booksIDs.length; b++){
+          url = "/books/id/" + booksIDs[b];
+          request = $http({
+                 "method": "get",
+                  "url": url});
+
+          request.success(function(reply){
+            $scope.books = []
+            if(reply.books != null){
+              $scope.books.push(reply.books);
+              console.log($scope.books);
+            } 
+            else {
+              alert(reply.resultado);
+            }
+            
           }
+          );
+
+          $scope.htitle= "Título";
+          $scope.hauthor = "Autor";
+          $scope.harea = "Área";
+        }
+      } else {
+          $scope.clear();
+          alert(reply.resultado);
+      }
      }
     );
 
@@ -71,9 +100,10 @@ app.controller('myCtrl', function($scope, $http) {
       }
     );
   };
-*/
+
   // INSERE
   $scope.insere = function() {
+      
       if ($scope.titlec == undefined || $scope.titlec.length == 0 ){
             alert("Preencha o título corretamente.");
             return;
@@ -99,40 +129,72 @@ app.controller('myCtrl', function($scope, $http) {
     );
   };
 
-/*
+
   // REMOVE
   $scope.remove = function() {
-     $scope.clear(false);
+    var bookID;
      if ($scope.titlec == undefined || $scope.titlec.length == 0) {
          $scope.clear();
-         alert("Preencha o título do livro.");
+         alert("Preencha o título do exemplar.");
          return;
      } 
      else {
       var decision = confirm("Tem certeza disso?");
       if(!decision){
         alert("Operação cancelada.");
-        $scope.clear(true);
+        $scope.clear();
         return;
       }
      }
      var request = $http({
-                 "method": "delete",
+                 "method": "get",
                  "url": "/books/" + $scope.titlec});
      request.success(function(reply) {
-         alert(reply.resultado);
-         $scope.clear(true);
+        if(reply.books != null) {
+         bookID = reply.books[0].bookID;
+         
+         var data = {"owner": "", "copyID": 0,
+                      "bookID": ""};
+
+         data = {"owner": "Pablo", "copyID": 0,       // substituir pelo nome do usuario logado 
+                      "bookID": bookID};
+
+         console.log(data);
+         request = $http({
+                    "method": "delete",
+                     "url": "/copies", 
+                     "data": data}); 
+
+         request.success(function(reply) {
+            alert(reply.resultado);
+           }
+         );
+         request.error(function(reply) {
+            alert("Falha na Requisição!");
+            return;
+           }
+         );
+        } else {           
+            $scope.clear();
+            alert(reply.resultado);
+            return;
+          }
        }
      );
      request.error(function(reply) {
         alert("Falha na Requisição!");
+        return;
        }
      );
+     
+     
+     
    };
-*/
+
+  
   // CLEAR
-  $scope.clear = function(clearAll) {
-    $scope.titlec = "";
+  $scope.clear = function() {
+    $scope.titlec = " ";
   }  
 }
 );

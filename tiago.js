@@ -160,7 +160,7 @@ router.route('/books/:title')   // operacoes sobre um livro
   .put(function(req, res) {   // PUT (altera)
       var response = {};
       var query = {"title": req.params.title};
-      var data = {"title": req.params.title, "nCopies": req.params.nCopies, //"owner": req.body.owner, 
+      var data = {"title": req.params.title, //"nCopies": req.params.nCopies, //"owner": req.body.owner, 
                   "author": req.body.author, "area": req.body.area};
 
       console.log(req.path);
@@ -204,6 +204,36 @@ router.route('/books/:title')   // operacoes sobre um livro
              }
           }
         )
+    }
+  );
+
+router.route('/books/id/:bookID')   // operacoes sobre um livro
+  .get(function(req, res) {   // GET
+      var response = {};
+      var query = {"bookID": req.params.bookID};
+
+      console.log(req.path);
+      console.log(JSON.stringify(req.body));
+      console.log(query);
+
+      mongoBooks.findOne(query, function(erro, data) {
+       
+         if(erro) {
+            response = {"resultado": "Falha de acesso ao BD."};
+            res.json(response);
+         } else if (data == null) {
+            response = {"resultado": "Livro inexistente."};
+            res.json(response);   
+         } else {
+            response = {"books": data};
+            console.log(response);
+            res.json(response);
+
+          }
+        }
+      )
+    
+      
     }
   );
 
@@ -265,13 +295,16 @@ router.route('/copies')   // operacoes sobre os exemplares de um determinado don
       )
     }
   )
+
   .delete(function(req, res) {   // DELETE (remove)
      var response = {};
-     var query = {"copyID": req.params.copyID};
+     var query = {"owner": req.body.owner,"bookID": req.body.bookID};
 
      console.log(req.path);
      console.log(JSON.stringify(req.body));
      console.log(query);
+     console.log("deletaaar");
+
      mongoCopies.findOneAndRemove(query, function(erro, data) {
        
          if(erro) {
@@ -289,6 +322,7 @@ router.route('/copies')   // operacoes sobre os exemplares de um determinado don
     }
   );
 
+
 router.route('/copies/:owner')   // operacoes sobre um exemplar
   .get(function(req, res) {   // GET
       var response = {};
@@ -298,7 +332,7 @@ router.route('/copies/:owner')   // operacoes sobre um exemplar
       console.log(JSON.stringify(req.body));
       console.log(query);
 
-      mongoCopies.findOne(query, function(erro, data) {
+      mongoCopies.find(query, function(erro, data) {
        
          if(erro) {
             response = {"resultado": "Falha de acesso ao BD."};
@@ -318,6 +352,7 @@ router.route('/copies/:owner')   // operacoes sobre um exemplar
       
     }
   );
+
 
   /*
   .put(function(req, res) {   // PUT (altera exemplar)

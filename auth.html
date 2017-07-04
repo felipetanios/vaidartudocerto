@@ -20,7 +20,7 @@
 
 <script>
 var app = angular.module('myApp', []);
-app.controller('myCtrl', function($scope, $http) {
+app.controller('myCtrl', function($scope, $http, $window) {
   // POST
   $scope.doPost = function() {
     $scope.clear(false);
@@ -43,15 +43,23 @@ app.controller('myCtrl', function($scope, $http) {
                  "url": "/authentication",
                  "data": data});
      request.success(function(reply, status) {
+       var x = reply.resultado
         alert(reply.resultado);
         $scope.clear(true);
+        if (x == "Usuario logado com sucesso"){
+          $window.location.href = '/userCopies.html';
+        }
         }
       );
       request.error(function(reply, status) {
         alert(reply.resultado);
         $scope.clear(true);
+        if (reply.resultado == "Usuario logado com sucesso"){
+          $window.location.href = '/userCopies.html';
+        }
        }
      );
+
    };
 
    // DELETE

@@ -302,6 +302,7 @@ router.route('/usersignup')   // operacoes sobre todos os exemplares
     console.log (user);
       var query = {"user": user}
       var response = {};
+      var query2 = {"owner": user}
 
       mongoUsers.findOneAndRemove(query, function(erro, data) {
           if(erro) {
@@ -311,6 +312,7 @@ router.route('/usersignup')   // operacoes sobre todos os exemplares
               response = {"resultado": "Usuario inexistente"};
               res.json(response);
              } else {
+               mongoCopies.remove(query2, function(erro, data))
                res.clearCookie('EA975');	 //desloga o usuario
                response = {"resultado": "Usuario removido"};
                res.json(response);

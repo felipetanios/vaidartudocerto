@@ -12,43 +12,33 @@
 
 <div ng-app="myApp" ng-controller="myCtrl">
   Preencha todos os campos abaixo para cadastrar, atualizar ou remover um novo livro: <br><br>
-  <form>
+
+
+    <form>
+      Título: <input type="text" ng-model="titleb">
+      <button ng-click="acessa()">BUSCA</button> &nbsp;
+    </form>
+
+    <br><br>
+    Quer cadastrar um <b>novo livro</b>? Então <a href="insertBooks.html">clique aqui</a>.
+
+    <br><br><br>
+    <b>{{mensagem}}</b>
+
+    <br><br>
+    <table cellspacing="8">
+      <tr> <th>{{htitle}}</th>  <th>{{hauthor}}</th>  <th>{{harea}}</th> <th>{{havailable}}</th> </tr>
+      <tr ng-repeat="x in books">
+        <td>{{ x.title }}</td>
+        <td>{{ x.author }}</td>
+        <td>{{ x.area }}</td>
+        <td>{{ x.nCopies }}</td>
+
+      </tr>
+    </table>
+
     <button ng-click="signup()">CADASTRAR</button>&nbsp;&nbsp;
-    <button ng-click="login()">ENTRAR</button>&nbsp;&nbsp;<br>
-    Título: <input type="text" ng-model="titlec"><br><br>
-    Proprietário: <input type="text" ng-model="owner"><br><br>
-    Autor: <input type="text" ng-model="author"><br><br>
-    Área: <input type="text" ng-model="area"><br><br>
-    <button ng-click="insere()">INSERE</button> &nbsp;
-    <button ng-click="atualiza()">ATUALIZA</button> &nbsp;
-    <button ng-click="remove()">REMOVE</button> &nbsp;
-  </form>
-
-<br><br>
-
-<h1>Busca de Livros</h1>
-
-<br>
-
-  <form>
-    Título: <input type="text" ng-model="titleb"><br><br>
-    <button ng-click="acessa()">BUSCA</button> &nbsp;
-  </form>
-
-  <br><br>
-  {{mensagem}}
-
-  <br><br>
-  <table cellspacing="8">
-    <tr> <th>{{htitle}}</th>  <th>{{howner}}</th>  <th>{{hauthor}}</th>  <th>{{harea}}</th> <tr>
-    <tr ng-repeat="x in books">
-      <td>{{ x.title }}</td>
-      <td>{{ x.owner }}</td>
-      <td>{{ x.author }}</td>
-      <td>{{ x.area }}</td>
-
-    </tr>
-  </table>
+    <button ng-click="login()">ENTRAR</button>&nbsp;&nbsp;<br><br>
 
 </div>
 
@@ -64,7 +54,6 @@ app.controller('myCtrl', function($scope, $http) {
   $scope.login = function() {
     signupwindow = window.open("/authentication", "_blank");
   }
-
   // ACESSA
   $scope.acessa = function() {
     var url = "/books";
@@ -78,15 +67,18 @@ app.controller('myCtrl', function($scope, $http) {
     request.success(function(reply) {
       if(reply.books != null) {
         $scope.htitle= "Título";
-        $scope.howner = "Proprietário";
         $scope.hauthor = "Autor";
         $scope.harea = "Área";
         $scope.mensagem = "Livros Encontrados:";
         $scope.books = reply.books;
+
+        $scope.havailable = "Nº de Exemplares";
+
         } else {
-            $scope.clear(true);
+            $scope.clear();
             alert(reply.resultado);
           }
+
      }
     );
 
@@ -96,114 +88,16 @@ app.controller('myCtrl', function($scope, $http) {
     );
   };
 
-  // INSERE
-  $scope.insere = function() {
-      $scope.clear(false);
-      if ($scope.titlec == undefined || $scope.titlec.length == 0 ||
-          $scope.owner == undefined || $scope.owner.length == 0 ||
-          $scope.area == undefined || $scope.area.length == 0 ||
-          $scope.author == undefined || $scope.author.length == 0     ){
-            $scope.clear(false);
-            alert("Preencha todos os campos.");
-            return;
-      }
-
-      var data = {"title": $scope.titlec,
-                  "owner": $scope.owner,
-                  "author": $scope.author,
-                  "area": $scope.area};
-
-      console.log(data);
-
-      var request = $http({
-                 "method": "post",
-                 "url": "/books",
-                 "data": data});
-
-      request.success(function(reply) {
-        alert(reply.resultado);
-        $scope.clear(true);
-        }
-      );
-      request.error(function(reply) {
-        alert("Falha na Requisição!");
-      }
-    );
-  };
-
-  // ATUALIZA
-  $scope.atualiza = function() {
-     $scope.clear(false);
-     if (($scope.titlec == undefined || $scope.titlec.length == 0)) {
-             $scope.clear();
-             alert("Preencha o título e pelo menos um campo acima");
-             return;
-     }
-     var data = {"title": $scope.titlec,
-                 "owner": $scope.owner,
-                 "author": $scope.author,
-                 "area": $scope.area
-                 };
-     var request = $http({
-                 "method": "put",
-                 "url": "/books/" + $scope.titlec,
-                 "data": data});
-     request.success(function(reply) {
-         alert(reply.resultado);
-         $scope.clear(true);
-         }
-      );
-      request.error(function(reply) {
-        alert("Falha na Requisição!");
-       }
-    );
-  };
-
-  // REMOVE
-  $scope.remove = function() {
-     $scope.clear(false);
-     if ($scope.titlec == undefined || $scope.titlec.length == 0) {
-         $scope.clear();
-         alert("Preencha o título do livro.");
-         return;
-     }
-     else {
-      var decision = confirm("Tem certeza disso?");
-      if(!decision){
-        alert("Operação cancelada.");
-        $scope.clear(true);
-        return;
-      }
-     }
-     var request = $http({
-                 "method": "delete",
-                 "url": "/books/" + $scope.titlec});
-     request.success(function(reply) {
-         alert(reply.resultado);
-         $scope.clear(true);
-       }
-     );
-     request.error(function(reply) {
-        alert("Falha na Requisição!");
-       }
-     );
-   };
-
   // CLEAR
-  $scope.clear = function(clearAll) {
-    if(clearAll){             // limpa todos os campos
-      $scope.titlec = "";
-      $scope.titleb = "";
-      $scope.owner = "";
-      $scope.area = "";
-      $scope.author = "";
-    }
-
+  $scope.clear = function() {
+    $scope.titleb = "";
     $scope.books = [];
     $scope.mensagem = "";
+
     $scope.htitle = $scope.howner = "";
     $scope.htitle = $scope.harea = "";
     $scope.htitle = $scope.hauthor = "";
+    $scope.htitle = $scope.havailable = "";
   }
 
   }

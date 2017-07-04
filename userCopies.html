@@ -155,22 +155,17 @@ app.controller('myCtrl', function($scope, $http) {
         if(reply.books != null) {
          bookID = reply.books[0].bookID;
          
-         var data = {"owner": "", "copyID": 0,
-                      "bookID": ""};
-
-         data = {"owner": "Pablo", "copyID": 0,       // substituir pelo nome do usuario logado 
-                      "bookID": bookID};
-
-         console.log(data);
+         var url = "/copies/" + "Pablo" + "/" + bookID;       // substituir pelo nome do usuario logado 
+                      
          request = $http({
                     "method": "delete",
-                     "url": "/copies", 
-                     "data": data}); 
+                     "url": url}); 
 
          request.success(function(reply) {
             alert(reply.resultado);
            }
          );
+
          request.error(function(reply) {
             alert("Falha na Requisição!");
             return;

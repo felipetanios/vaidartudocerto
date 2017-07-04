@@ -1,4 +1,0 @@
-Corrigir bug de atualizar livro (insertBooks.html)
-Corrigir bug de deletar exemplar (userCopies.html)
-Mostrar exemplares do usuário (userCopies.html)
-Fazer integração de exemplares/livros com autenticação e trocas

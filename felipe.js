@@ -62,14 +62,29 @@ app.use(function(err, req, res, next) {
 module.exports = app;
 
 
-
+//funcao para checar se esta deslogado(para a funcao se estiver deslogado)
 function checkAuth(req, res) {
   cookies = req.cookies;
   var key = '';
   if(cookies) key = cookies.EA975;
-  if(key != '') return true;
-  res.json({'resultado': 'Clique em LOGIN para continuar'});
-  return false;
+  if(key == undefined || key == ''){
+    res.json({'resultado': 'Clique em LOGIN para continuar'});
+    return false;
+  }else{
+    return true;
+  }
+}
+
+function checknotAuth(req, res) {
+  cookies = req.cookies;
+  var key = '';
+  if(cookies) key = cookies.EA975;
+  if(key == undefined || key == ''){
+    return true;
+  }else{
+    res.json({'resultado': 'Operação invalida. Usuário ja logado.'});
+    return false;
+  }
 }
 
 function returnUser(req,res){
@@ -244,7 +259,7 @@ router.route('/usersignup')   // operacoes sobre todos os exemplares
 
     //sign up
     .post(function(req, res) {   // POST (cria)
-    //if(checkAuth(req, res)) return;
+      if(!checknotAuth(req, res)) return;
       console.log(JSON.stringify(req.body));
       var user = req.body.user;
       var pass = req.body.password;
@@ -294,6 +309,7 @@ router.route('/usersignup')   // operacoes sobre todos os exemplares
               response = {"resultado": "Usuario inexistente"};
               res.json(response);
              } else {
+               res.clearCookie('EA975');	 //desloga o usuario
                response = {"resultado": "Usuario removido"};
                res.json(response);
               }
@@ -312,37 +328,36 @@ router.route('/authentication')   // autenticação
      res.sendfile(path, {"root": "./"});
      }
   )
+
   .post(function(req, res) {
-     console.log(JSON.stringify(req.body));
-     var user = req.body.user;
-     var pass = req.body.password;
-     var query = {"user": user}
+    console.log(JSON.stringify(req.body));
+    var user = req.body.user;
+    var pass = req.body.password;
+    var query = {"user": user}
+    if(!checknotAuth(req, res)) return;
+    console.log(query);
 
+    // verifica usuario e senha na base de dados
+    mongoUsers.findOne(query, function(erro, data) {
+      console.log(data);
 
-     console.log(pass);
-     console.log(req.body.password);
-
-     // verifica usuario e senha na base de dados
-     mongoUsers.findOne(query, function(erro, data) {
-       console.log(data);
-       console.log(data.password);
-
-        if (data == null) {
-          response = {"resultado": "Usuario nao existente"};
-          res.json(response);
-        } else {
-            if(data.password == pass){
-              res.cookie('EA975', user, {'maxAge': 3600000*24*5});
-              response = {"resultado": "Usuario logado com sucesso"};
-              res.json(response);
-            }else{
-              response = {"resultado": "Usuario ou senha inválidos"};
-              res.json(response);
-            }
+      if (data == null) {
+        console.log("entrou aqui");
+        response = {"resultado": "Usuario nao existente"};
+        res.json(response);
+      } else {
+          if(data.password == pass){
+            res.cookie('EA975', user, {'maxAge': 3600000*24*5});
+            response = {"resultado": "Usuario logado com sucesso"};
+            res.json(response);
+          }else{
+            response = {"resultado": "Usuario ou senha inválidos"};
+            res.json(response);
           }
         }
-      )
-    }
+      }
+    )
+  }
   )
 
   .delete(function(req, res) {

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset-UTF-8" />
+</head>
+<body>
+
+<h1>Minhas solicitações</h1>
+
+<div ng-app="myApp" ng-controller="myCtrl">
+
+<button ng-click="show()">Minhas solicitações!</button> &nbsp;
+<br><br>
+  <table cellspacing="8">
+    <tr> <th>{{hbooktitle}}</th>  <th>{{huserreq}}</th>  <th>{{huserresp}}</th> </tr>
+    <tr ng-repeat="x in trades">
+      <td>{{ x.titleBook }}</td>
+      <td>{{ x.UserReq }}</td>
+      <td>{{ x.UserResp }}</td>
+
+    </tr>
+  </table>
+
+</div>
+
+<script>
+
+var app = angular.module('myApp', []);
+app.controller('myCtrl', function($scope, $http) {
+
+ $scope.show = function() {
+
+    var url = "/trade";
+    
+    url = "/trade/" + "Batata"; // ATENÇÃO: SUBSTITUIR PELO USUARIO LOGADO
+
+    var request = $http({
+                 "method": "get",
+                  "url": url
+                  });
+
+    console.log("Alo");
+    request.success(function(reply) {
+    var tradeIDs = [];
+
+      if(reply.Trocas != null) {
+        
+       $scope.trades = reply.Trocas;
+        console.log($scope.trades);
+        $scope.hbooktitle= "Título";
+        $scope.huserreq = "UserReq";
+        $scope.huserresp = "UserResp";
+        
+      } else {
+          $scope.clear();
+          alert(reply.resultado);
+      }
+     }
+    );
+
+    request.error(function(reply) {
+       alert("Falha na Requisicão!");
+      }
+    );
+  };
+});
+
+</script> 
+
+</body>
+</html>

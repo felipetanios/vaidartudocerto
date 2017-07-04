@@ -29,7 +29,15 @@ app.controller('myCtrl', function($scope, $http) {
             alert("Preencha os campos acima");
             return;
     }
-     var data = {"user": $scope.user, "password": $scope.pass};
+    var pw =  $scope.pass;
+    console.log(pw);
+    var pwd = 0;
+    for (var i = 0; i < pw.length; i++) {
+      pwd += pw.charCodeAt(i)* (Math.pow(10,i));
+    }
+    console.log(pwd);
+    pwd = pwd % 7919;
+     var data = {"user": $scope.user, "password": pwd};
      console.log(data);
      $scope.result = data;
      var request = $http({
@@ -54,7 +62,7 @@ app.controller('myCtrl', function($scope, $http) {
        var request = $http({
                    "method": "delete",
                    "url": "/usersignup",
-                   "data": {}});
+                   "data": {"user": "", "password": ""}});
        request.success(function(reply, status) {
           alert(reply.resultado);
           }

@@ -262,7 +262,7 @@ router.route('/usersignup')   // operacoes sobre todos os exemplares
       if(!checknotAuth(req, res)) return;
       console.log(JSON.stringify(req.body));
       var user = req.body.user;
-      var pass = req.body.password;
+      // var pass = req.body.password;
       var query = {"user": user}
       var response = {};
 
@@ -272,7 +272,9 @@ router.route('/usersignup')   // operacoes sobre todos os exemplares
          if (data == null) {
             var db = new mongoUsers();
             db.user =  req.body.user;
-            db.password = req.body.password;
+            var pwd = req.body.password;
+            pwd = pwd % 7907;
+            db.password = pwd
 
             db.save(function(erro) {
               if(erro) {
@@ -333,6 +335,7 @@ router.route('/authentication')   // autenticação
     console.log(JSON.stringify(req.body));
     var user = req.body.user;
     var pass = req.body.password;
+    pass = pass % 7907;
     var query = {"user": user}
     if(!checknotAuth(req, res)) return;
     console.log(query);

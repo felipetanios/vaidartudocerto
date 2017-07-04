@@ -29,7 +29,13 @@ app.controller('myCtrl', function($scope, $http) {
             alert("Preencha os campos acima");
             return;
     }
-     var data = {"user": $scope.user, "password": $scope.pass};
+    var pw =  $scope.pass;
+    var pwd = 0;
+    for (var i = 0; i < pw.length; i++) {
+      pwd += pw.charCodeAt(i)* (Math.pow(10,i));
+    }
+    pwd = pwd % 7919;
+     var data = {"user": $scope.user, "password": pwd}
      console.log(data);
      $scope.result = data;
      var request = $http({

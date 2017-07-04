@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset-UTF-8" />
+</head>
+<body>
+
+<h1>Buscar Exemplar</h1>
+
+<div ng-app="myApp" ng-controller="myCtrl">
+
+Entre com o título do livro de interesse:
+    <form>
+        Título: <input type="text" ng-model="bookTitle"> 
+        <button ng-click="search()">BUSCAR</button> &nbsp;
+    </form>
+    
+    <br><br>
+    <table cellspacing="8">
+        <tr> <th>{{headerTitle}}</th>  <th>{{headerAuthor}}</th>  <th>{{headerArea}}</th>  <th>{{headerOwner}}</th>  <th>{{headerRequest}}</th> </tr>
+        <tr ng-repeat="c in copies">
+            <td>{{ c.title }}</td>
+            <td>{{ c.author }}</td>
+            <td>{{ c.area }}</td>
+            <td>{{ c.owner }}</td>
+            <td> <button ng-click="solicitar(c)">Solicitar troca</button>
+        </tr>
+    </table>
+</div>
+
+<script>
+var app = angular.module('myApp', []);
+app.controller('myCtrl', function($scope, $http) {
+
+    $scope.search = function(){
+        if ($scope.bookTitle == undefined || $scope.bookTitle.length == 0 ){
+            alert("Preencha o título corretamente.");
+            return;
+        }
+            
+        console.log($scope.bookTitle);
+        
+        var url = '/copies/title/'+$scope.bookTitle;
+        
+        console.log(url);
+        
+        var request = $http({
+            method : 'get',
+            url : url
+            });
+            
+        request.sucess(function(reply, status){
+            console.log(reply);
+            if (reply.copies){
+                $scope.copies = reply.copies;
+                console.log($scope.copies);
+            }
+            else{
+                alert(reply.resultado);
+            }
+            
+            $scope.headerTitle = "Título";
+            $scope.headerAuthor = "Autor";
+            $scope.headerArea = "Area";
+            $scope.headerOwner = "Proprietário";
+            $scope.headerRequest = "Solicitar";
+        });
+        
+        request.error(function(reply, status){
+            alert("Falha na requisição");
+        });
+    }
+    
+    $scope.solicitar = function(copy){
+        if (!copy) {
+            alert("Falha na requisição");
+            return;
+        }
+        var request = $http({
+            method : 'post',
+            url : '/trades',
+            data : copy
+            });
+        request.success(function(reply){
+            alert(reply.resultado);
+            $scope.copies = null;
+        });
+        request.error(function(reply){
+            alert("Não foi possível solicitar a troca =(");
+        });
+    }
+});
+
+</script>
+
+</body>
+</html>

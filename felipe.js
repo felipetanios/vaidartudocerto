@@ -312,7 +312,7 @@ router.route('/usersignup')   // operacoes sobre todos os exemplares
               response = {"resultado": "Usuario inexistente"};
               res.json(response);
              } else {
-               mongoCopies.remove(query2, function(erro, data))
+               mongoCopies.remove(query2, function(erro, data){});
                res.clearCookie('EA975');	 //desloga o usuario
                response = {"resultado": "Usuario removido"};
                res.json(response);

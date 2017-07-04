@@ -25,7 +25,7 @@ app.use('/', express.static(__dirname + '/'));
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({"extended" : false }));
+app.use(bodyParser.urlencoded({"extended" : true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -73,7 +73,7 @@ router.route('/')
   );
 
 router.route('/books')   // operacoes sobre todos os livros
-  .get(function(req, res) {  // GET
+  /*.get(function(req, res) {  // GET
     var response = {};
 
     console.log(req.path);
@@ -89,7 +89,35 @@ router.route('/books')   // operacoes sobre todos os livros
         }
       )
     }
+  )*/
+
+  .get(function(req, res) {   // GET
+      var response = {};
+      var query = {"bookIDs": req.body.bookID};
+
+      console.log(req.path);
+      console.log(JSON.stringify(req.body));
+      console.log(query);
+
+      mongoBooks.find(query, function(erro, data) {
+       
+         if(erro) {
+            response = {"resultado": "Falha de acesso ao BD."};
+            res.json(response);
+         } else if (data == null) {
+            response = {"resultado": "Livro inexistente."};
+            res.json(response);   
+         } else {
+            response = {"books": data};
+            console.log(response);
+            res.json(response);
+
+          }
+        }
+      )      
+    }
   )
+
   .post(function(req, res) {   // POST (cria)
      var query = {"title": req.body.title};
      var response = {};
@@ -118,7 +146,8 @@ router.route('/books')   // operacoes sobre todos os livros
                  res.json(response);
               }
             }
-          )
+          );
+
         } else {
             response = {"resultado": "Livro já existente."};
             res.json(response);
@@ -207,35 +236,6 @@ router.route('/books/:title')   // operacoes sobre um livro
     }
   );
 
-router.route('/books/id/:bookID')   // operacoes sobre um livro
-  .get(function(req, res) {   // GET
-      var response = {};
-      var query = {"bookID": req.params.bookID};
-
-      console.log(req.path);
-      console.log(JSON.stringify(req.body));
-      console.log(query);
-
-      mongoBooks.findOne(query, function(erro, data) {
-       
-         if(erro) {
-            response = {"resultado": "Falha de acesso ao BD."};
-            res.json(response);
-         } else if (data == null) {
-            response = {"resultado": "Livro inexistente."};
-            res.json(response);   
-         } else {
-            response = {"books": data};
-            console.log(response);
-            res.json(response);
-
-          }
-        }
-      )
-    
-      
-    }
-  );
 
 /*
 *   OPERAÇÕES SOBRE EXEMPLARES
@@ -285,7 +285,8 @@ router.route('/copies')   // operacoes sobre os exemplares de um determinado don
                 res.json(response);
               }
             }
-          )
+          );
+
 
         } else {
             response = {"resultado": "Livro não existente. Para cadastrar um exemplar, cadastre o livro primeiro."};
@@ -294,33 +295,32 @@ router.route('/copies')   // operacoes sobre os exemplares de um determinado don
         }
       )
     }
-  )
+  );
+  /*.put(function(req, res) {   // PUT (altera exemplar)
+      var response = {};
+      var query = {"copyID": req.params.copyID};
+      var data = {"owner": req.params.owner, "bookID": req.body.bookID, "copyID": req.body.copyID};
 
-  .delete(function(req, res) {   // DELETE (remove)
-     var response = {};
-     var query = {"owner": req.body.owner,"bookID": req.body.bookID};
+      console.log(req.path);
+      console.log(JSON.stringify(req.body));
+      console.log(query);
 
-     console.log(req.path);
-     console.log(JSON.stringify(req.body));
-     console.log(query);
-     console.log("deletaaar");
-
-     mongoCopies.findOneAndRemove(query, function(erro, data) {
-       
-         if(erro) {
+      /*mongoBooks.findOneAndUpdate(query, data, function(erro, data) {
+          
+          if(erro) {
             response = {"resultado": "Falha de acesso ao BD!"};
             res.json(response);
-         }else if (data == null) {        
+          } else if (data == null) { 
              response = {"resultado": "Exemplar inexistente."};
-             res.json(response);
-            } else {
-              response = {"resultado": "Exemplar removido do seu inventório."};
-              res.json(response);
-             }
-          }
-        )
+             res.json(response);   
+          } else {
+             response = {"resultado": "Exemplar atualizado."};
+             res.json(response);   
     }
-  );
+        }
+      )
+    }
+  )*/
 
 
 router.route('/copies/:owner')   // operacoes sobre um exemplar
@@ -353,35 +353,58 @@ router.route('/copies/:owner')   // operacoes sobre um exemplar
     }
   );
 
+router.route('/copies/:owner/:bookID')
+  .delete(function(req, res) {   // DELETE (remove)
+     var response = {};
+     var query = {"owner": req.params.owner,"bookID": req.params.bookID};
 
-  /*
-  .put(function(req, res) {   // PUT (altera exemplar)
-      var response = {};
-      var query = {"copyID": req.params.copyID};
-      var data = {"onwer": req.params.owner, "bookID": req.body.bookID, "copyID": req.body.copyID};
+     console.log(req.path);
+     console.log(req.params);
+     console.log(query);
 
-      console.log(req.path);
-      console.log(JSON.stringify(req.body));
-      console.log(query);
-
-      mongoBooks.findOneAndUpdate(query, data, function(erro, data) {
-          
-          if(erro) {
+     mongoCopies.findOneAndRemove(query, function(erro, data) {
+       
+         if(erro) {
             response = {"resultado": "Falha de acesso ao BD!"};
             res.json(response);
-          } else if (data == null) { 
+         }else if (data == null) {        
              response = {"resultado": "Exemplar inexistente."};
-             res.json(response);   
-          } else {
-             response = {"resultado": "Exemplar atualizado."};
-             res.json(response);   
-    }
+             res.json(response);
+            } else {
+              response = {"resultado": "Exemplar removido do seu inventório."};
+              res.json(response);
+             }
+
+         query = {"bookID": req.params.bookID};
+
+         mongoBooks.findOne(query, function(erro, data) {
+          
+            if (data != null) {
+              // atualiza número de exemplares do livro disponiveis
+              var nCopies = data.nCopies - 1;
+              var data = {"nCopies": nCopies}
+
+              mongoBooks.findOneAndUpdate(query, data, function(erro, data) {
+                  
+                  if(erro) {
+                    response = {"resultado": "Falha de acesso ao BD!"};
+                    res.json(response);
+                  }
+                }
+              );
+
+
+            } else {
+                response = {"resultado": "Livro não existente. Para remover um exemplar, o livro deve ser cadastrado!"};
+                res.json(response);
+              }
+            }
+          )
         }
       )
     }
-  )
-  */
 
+  );
 
 /*
 *   OPERAÇÕES DE TROCA

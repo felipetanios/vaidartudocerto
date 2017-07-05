@@ -1,71 +1,174 @@
 <!DOCTYPE html>
 <html>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset-UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset-UTF-8" />
 </head>
+
 <body>
 
-<h1>Minhas solicitações</h1>
+    <h1>Minhas solicitações</h1>
 
-<div ng-app="myApp" ng-controller="myCtrl">
+    <div ng-app="myApp" ng-controller="myCtrl">
 
-<button ng-click="show()">Minhas solicitações!</button> &nbsp;
-<br><br>
-  <table cellspacing="8">
-    <tr> <th>{{hbooktitle}}</th>  <th>{{huserreq}}</th>  <th>{{huserresp}}</th> </tr>
-    <tr ng-repeat="x in trades">
-      <td>{{ x.titleBook }}</td>
-      <td>{{ x.UserReq }}</td>
-      <td>{{ x.UserResp }}</td>
+        <button ng-click="show()">Minhas solicitações!</button> &nbsp;
+        <br><br>
+        <table cellspacing="8">
+            <tr>
+                <th>{{hbooktitle}}</th>
+                <th>{{huserreq}}</th>
+                <th>{{huserresp}}</th>
+            </tr>
+            <tr ng-repeat="x in trades">
+                <td>{{ x.titleBook }}</td>
+                <td>{{ x.UserReq }}</td>
+                <td>{{ x.UserResp }}</td>
+                <td>
+                    <button ng-click="rejectTrade($index)"><strong>Não quero este livro!</strong></button>
+                      <p ng-show="showdenied[$index]"><strong>Troca Rejeitada</strong></p> 
+                    <table cellspacing="8">
+                        <tr>
+                            <th>{{howner}}</th>
+                            <th>{{hbookID}}</th>
+                            <th>{{hcopyID}}</th>
+                        </tr>
+                        <tr ng-repeat="x in copies">
+                            <td>{{ x.owner }}</td>
+                            <td>{{ x.bookID }}</td>
+                            <td>{{ x.copyID }}</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
 
-    </tr>
-  </table>
 
-</div>
-
+<!-- <body ng-app="NgHideShowApp">
+  <div ng-controller="AppCtrl">
+       
+        <table>
+        <tbody>
+            <tr ng-repeat="user in users">
+                <td>{{user.name}}</td>
+                <td>
+      <button ng-click="accept($index)"><strong>accept</strong></button>
+      <button ng-click="refuse($index)"><strong>refuse</strong></button>    
+        <p ng-show="showacceptation[$index]"><strong>je suis ton amis</strong></p> 
+        <p ng-show="showdenied[$index]"><strong>you refuse me</strong></p>      
+                </td>
+            </tr>
+        </tbody>
+        </table>
+    </div>
+</body> -->
 <script>
 
 var app = angular.module('myApp', []);
 app.controller('myCtrl', function($scope, $http) {
+    $scope.showdenied = {};
+    $scope.jsonTrades = {};
+    $scope.jsonCopies = {};
+    $scope.jsonBooks = {};
+    var copiesIDs = [];
 
- $scope.show = function() {
+    $scope.show = function() {
 
-    var url = "/trade";
-    
-    url = "/trade/" + "Batata"; // ATENÇÃO: SUBSTITUIR PELO USUARIO LOGADO
+        var url = "/trade";
 
-    var request = $http({
-                 "method": "get",
-                  "url": url
-                  });
+        url = "/trade/" + "Batata"; // ATENÇÃO: SUBSTITUIR PELO USUARIO LOGADO
 
-    console.log("Alo");
-    request.success(function(reply) {
-    var tradeIDs = [];
+        var requestTrade = $http({
+            "method": "get",
+            "url": url
+        });
 
-      if(reply.Trocas != null) {
-        
-       $scope.trades = reply.Trocas;
-        console.log($scope.trades);
-        $scope.hbooktitle= "Título";
-        $scope.huserreq = "UserReq";
-        $scope.huserresp = "UserResp";
-        
-      } else {
-          $scope.clear();
-          alert(reply.resultado);
-      }
-     }
-    );
+        console.log("Alo");
+        requestTrade.success(function(reply) {
+            var tradeIDs = [];
 
-    request.error(function(reply) {
-       alert("Falha na Requisicão!");
-      }
-    );
-  };
+            if (reply.Trocas != null) {
+
+                $scope.trades = reply.Trocas;
+                console.log($scope.trades);
+                $scope.hbooktitle = "Título";
+                $scope.huserreq = "UserReq";
+                $scope.huserresp = "UserResp";
+
+
+                var urlsecond = "/bookID";
+
+                urlsecond = "/bookID/" + "Batata";
+
+                var requestCopies = $http({
+                    "method": "get",
+                    "url": urlsecond
+                });
+
+                requestCopies.success(function(reply) {
+
+                    if (reply.Copies != null) {
+
+                        $scope.copies = reply.Copies;
+                        console.log($scope.copies);
+                        $scope.howner = "Dono";
+                        $scope.hbookID = "ID do livro";
+                        $scope.hcopyID = "ID da cópia";
+
+                        // for (i in $scope.copies) {
+                        //   copiesIDs.push($scope.copies[i].bookID);
+                        // }
+
+                        // var url3 = "/books/search/"
+                        // var data = {"copiesIDs": copiesIDs};
+
+                    } else {
+                        $scope.clear();
+                        alert(reply.resultado);
+                    }
+                });
+
+                requestCopies.error(function(reply) {
+                    alert("Falha na Requisicão de Cópia!");
+                });
+
+            } else {
+                $scope.clear();
+                alert(reply.resultado);
+            }
+        });
+
+    };
+
+    $scope.rejectTrade = function(idx) {
+        $scope.showdenied[idx] = true;
+    }
+
 });
 
+
+// angular.module('NgHideShowApp', [])
+//  .controller('AppCtrl',['$scope', function($scope){
+//      $scope.showacceptation ={};
+//      $scope.showdenied = {};
+     
+     
+//      $scope.users = [{name: 'firstUser'},
+//       {name: 'secondUser'}, 
+//       {name: 'User3'},
+//       {name: 'User4'}];
+
+//    $scope.accept = function(idx){
+//        $scope.showacceptation[idx] = true;
+//        $scope.showdenied[idx] = false;
+//    }
+
+//    $scope.refuse = function(idx){
+//      $scope.showdenied[idx] = true;
+//        $scope.showacceptation[idx] = false;
+//    } 
+
+// }]);
 </script> 
 
 </body>

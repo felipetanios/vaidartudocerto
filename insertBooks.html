@@ -75,7 +75,7 @@ app.controller('myCtrl', function($scope, $http) {
                  };
      var request = $http({
                  "method": "put",
-                 "url": "/books/" + $scope.titlec,
+                 "url": "/books/title" + $scope.titlec,
                  "data": data});
      request.success(function(reply) {
          alert(reply.resultado);

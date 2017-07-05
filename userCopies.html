@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-cookies.js"></script>
+
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset-UTF-8" />
 </head>
@@ -42,15 +44,17 @@
 
 
 <script>
-var app = angular.module('myApp', []);
-app.controller('myCtrl', function($scope, $http) {
+var app = angular.module('myApp', ['ngCookies']);       // usar cookies para obter usuário
+app.controller('myCtrl', function($scope, $http, $cookies) {
 
  $scope.show = function() {
 
     console.log("Aqui");
     var url = "/copies";
 
-    url = "/copies/" + "Pablo"; // ATENÇÃO: SUBSTITUIR PELO USUARIO LOGADO
+    var cookiesUser = $cookies.get('EA975');
+    console.log(cookiesUser);
+    url = "/copies/" + cookiesUser; 
 
     var request = $http({
                  "method": "get",
@@ -58,6 +62,14 @@ app.controller('myCtrl', function($scope, $http) {
 
     request.success(function(reply) {
       var booksIDs = [];
+
+      /*if(reply.copies[0].length == 0){
+        $scope.htitle= "";
+        $scope.hauthor = "";
+        $scope.harea = "";
+        alert("Você não tem exemplares cadastrados no momentos!");
+
+      }*/
 
       if(reply.copies != null) {
 
@@ -68,12 +80,16 @@ app.controller('myCtrl', function($scope, $http) {
         console.log(booksIDs);
 
 
-        url = "/books";
-        var data = {"booksIDs": booksIDs}
+        url = "/books/bookID";
+        var data = ""; 
+        data = {"bookID": booksIDs};
+
         request = $http({
-               "method": "get",
+               "method": "post",
                 "url": url,
                 "data": data});
+
+        console.log(data);
 
         request.success(function(reply){
 
@@ -112,8 +128,9 @@ app.controller('myCtrl', function($scope, $http) {
             alert("Preencha o título corretamente.");
             return;
       }
-
-      var data = {"title": $scope.titlec, "owner": "Pablo"}; // ATENÇÃO: SUBSTITUIR PELO USUARIO LOGADO
+      var cookiesUser = $cookies.get('EA975');
+      console.log(cookiesUser);
+      var data = {"title": $scope.titlec, "owner": cookiesUser}; 
 
       console.log(data);
 
@@ -152,12 +169,14 @@ app.controller('myCtrl', function($scope, $http) {
      }
      var request = $http({
                  "method": "get",
-                 "url": "/books/" + $scope.titlec});
+                 "url": "/books/title" + $scope.titlec});
      request.success(function(reply) {
         if(reply.books != null) {
          bookID = reply.books[0].bookID;
 
-         var url = "/copies/" + "Pablo" + "/" + bookID;       // substituir pelo nome do usuario logado
+         var cookiesUser = $cookies.get('EA975');
+         console.log(cookiesUser);
+         var url = "/copies/" + cookiesUser + "/" + bookID;       // substituir pelo nome do usuario logado
 
          request = $http({
                     "method": "delete",

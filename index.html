@@ -37,8 +37,9 @@
       </tr>
     </table>
 
-    <button ng-click="signup()">CADASTRAR</button>&nbsp;&nbsp;
-    <button ng-click="login()">ENTRAR</button>&nbsp;&nbsp;<br><br>
+
+    <button ng-click="signup()">SIGN UP</button>&nbsp;&nbsp;
+    <button ng-click="login()">LOG IN</button>&nbsp;&nbsp;<br><br>
 
 </div>
 
@@ -56,9 +57,12 @@ app.controller('myCtrl', function($scope, $http) {
   }
   // ACESSA
   $scope.acessa = function() {
-    var url = "/books";
-    if ($scope.titleb != undefined)
-      url = "/books/" + $scope.titleb;
+    var url = "/books/title";
+    if ($scope.titleb != undefined){
+      url = "/books/title" + $scope.titleb;
+    }else{
+      alert("Preencha o título do livro.");
+    }
 
     console.log(url);
     var request = $http({

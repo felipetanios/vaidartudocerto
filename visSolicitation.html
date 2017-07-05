@@ -71,6 +71,7 @@ app.controller('myCtrl', function($scope, $http) {
     $scope.jsonCopies = {};
     $scope.jsonBooks = {};
     var copiesIDs = [];
+    $scope.books = {};
 
     $scope.show = function() {
 
@@ -115,12 +116,37 @@ app.controller('myCtrl', function($scope, $http) {
                         $scope.hbookID = "ID do livro";
                         $scope.hcopyID = "ID da cópia";
 
-                        // for (i in $scope.copies) {
-                        //   copiesIDs.push($scope.copies[i].bookID);
-                        // }
+                        for (i in $scope.copies) {
+                          copiesIDs.push($scope.copies[i].bookID);
+                        }
 
-                        // var url3 = "/books/search/"
-                        // var data = {"copiesIDs": copiesIDs};
+                        // índices invertidos a partir daqui
+                        console.log(copiesIDs);
+                        
+                        url3 = "/books/bookID";
+                        var data3 = "";
+                        data3 = {
+                            "bookID": copiesIDs
+                        };
+
+                        request = $http({
+                            "method": "post",
+                            "url": url3,
+                            "data": data3
+                        });
+
+                        console.log(data3);
+
+                        request.success(function(reply) {
+
+                            if (reply.books != null) {
+                                $scope.books = reply.books;
+                                console.log($scope.books);
+                            } else {
+                                alert(reply.resultado);
+                            }
+
+                        });                        
 
                     } else {
                         $scope.clear();

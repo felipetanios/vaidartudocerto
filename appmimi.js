@@ -306,6 +306,35 @@
          })
      });
 
+router.route('/books/bookID')
+  .post(function(req, res) {   // GET
+      var response = {};
+      var query = {"bookID": req.body.bookID};
+
+      console.log(req.path);
+      console.log(JSON.stringify(req.body));
+      console.log(query);
+
+      mongoBooks.find(query, function(erro, data) {
+       
+         if(erro) {
+            response = {"resultado": "Falha de acesso ao BD."};
+            res.json(response);
+         } else if (data == null) {
+            response = {"resultado": "Livro inexistente."};
+            res.json(response);   
+         } else {
+            response = {"books": data};
+            console.log(response);
+            res.json(response);
+
+          }
+        }
+      )      
+    }
+  );
+
+
 router.route('/books/search/:bookID') // operacoes sobre um livro
      .get(function(req, res) { // GET
          var response = {};
@@ -645,13 +674,16 @@ router.route('/bookID/:owner') // operacoes sobre um exemplar
          console.log(req.path);
          console.log(JSON.stringify(req.params.UserResp));
 
+
          mongoTrade.find(query, function(erro, data) {
              if (erro) {
+                 console.log("AAAAAAAAAAAAAAA");
                  response = {
                      "resultado": "Falha de acesso ao BD!"
                  };
                  res.json(response);
              } else if (data == null) {
+                 console.log("BBBBBBBBBBBBBB");
                  response = {
                      "resultado": "Troca inexistente."
                  };
@@ -660,6 +692,7 @@ router.route('/bookID/:owner') // operacoes sobre um exemplar
                  response = {
                      "Trocas": data
                  };
+                 console.log("CCCCCCCCCCCCCCCC");
                  console.log(response);
                  res.json(response);
              }

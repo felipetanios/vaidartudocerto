@@ -15,5 +15,5 @@ module.exports = usermongo.model('Alunos', alunoSchema);
 
 /*
 {"user": "felipe", "password": "senha"}
-{"user": "feec", "password": "pleasedont"}
+{"user": "feec", "password": "feec"}
 */

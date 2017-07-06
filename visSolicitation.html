@@ -206,7 +206,7 @@ app.controller('myCtrl', function($scope, $http, $cookies){
     request.success(function(reply) {
 
         if (reply != null) {
-            url = "/copies/" + $scope.jsonCopies[indexCopies].owner + "/" + $scope.jsonCopies[indexCopies].bookID;
+            url = "/copies/" + $scope.jsonCopies[$scope.jsonCopies.length - indexCopies + 1].owner + "/" + $scope.jsonCopies[$scope.jsonCopies.length  - indexCopies + 1].bookID;
             console.log(url);
 
             var requestTrade = $http({

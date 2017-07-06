@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-cookies.js"></script>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset-UTF-8" />
 </head>
@@ -18,22 +19,34 @@ Entre com o título do livro de interesse:
     
     <br><br>
     <table cellspacing="8">
-        <tr> <th>{{headerTitle}}</th>  <th>{{headerAuthor}}</th>  <th>{{headerArea}}</th>  <th>{{headerOwner}}</th>  <th>{{headerRequest}}</th> </tr>
-        <tr ng-repeat="c in copies">
+        <tr> <th>{{headerTitle}}</th>  <th>{{headerAuthor}}</th>  <th>{{headerArea}}</th> </tr>
+        <tr ng-repeat="c in books">
             <td>{{ c.title }}</td>
             <td>{{ c.author }}</td>
             <td>{{ c.area }}</td>
-            <td>{{ c.owner }}</td>
-            <td> <button ng-click="solicitar(c)">Solicitar troca</button>
+            <td>
+                <table cellspacing="8">
+                    <tr>
+                        <th>{{howner}}</th>
+                    </tr>
+                    <tr ng-repeat="y in copies">
+                        <td>{{ y.owner }}</td>
+                        <td> <button ng-click="solicitTrade($parent.$index, $index)">Solicitar troca</button>
+                    </tr>
+                </table>
+            </td>
         </tr>
     </table>
 </div>
 
 <script>
-var app = angular.module('myApp', []);
-app.controller('myCtrl', function($scope, $http) {
-
+var app = angular.module('myApp', ['ngCookies']);
+app.controller('myCtrl', function($scope, $http, $cookies) {
+    $scope.jsonCopies = {};
+    $scope.jsonBooks = {};
+    
     $scope.search = function(){
+        
         if ($scope.bookTitle == undefined || $scope.bookTitle.length == 0 ){
             alert("Preencha o título corretamente.");
             return;
@@ -41,7 +54,7 @@ app.controller('myCtrl', function($scope, $http) {
             
         console.log($scope.bookTitle);
         
-        var url = '/copies/title/'+$scope.bookTitle;
+        var url = '/books/'+$scope.bookTitle;
         
         console.log(url);
         
@@ -50,42 +63,82 @@ app.controller('myCtrl', function($scope, $http) {
             url : url
             });
             
-        request.sucess(function(reply, status){
-            console.log(reply);
-            if (reply.copies){
-                $scope.copies = reply.copies;
-                console.log($scope.copies);
-            }
-            else{
+        request.success(function(reply) {
+
+            if (reply.books != null) {
+                $scope.jsonBooks = reply.books;
+                $scope.books = reply.books;
+                console.log($scope.books);
+
+                $scope.headerTitle = "Título";
+                $scope.headerAuthor = "Autor";
+                $scope.headerArea = "Área";
+                
+                url3 = '/copies/owner/' + $scope.books[0].bookID;
+
+                request = $http({
+                    "method": "get",
+                    "url": url3,
+                });
+
+                request.success(function(reply) {
+                    if (reply.Copies != null) {
+                        $scope.jsonCopies = reply.Copies;
+                        $scope.copies = reply.Copies;
+                        console.log($scope.copies);
+
+                        $scope.headerTitle = "Dono";
+
+                    } else {
+                        alert(reply.resultado);
+                    }
+
+                });
+
+            } else {
                 alert(reply.resultado);
             }
-            
-            $scope.headerTitle = "Título";
-            $scope.headerAuthor = "Autor";
-            $scope.headerArea = "Area";
-            $scope.headerOwner = "Proprietário";
-            $scope.headerRequest = "Solicitar";
-        });
+
+        }); 
         
-        request.error(function(reply, status){
+        request.error(function(reply){
             alert("Falha na requisição");
         });
     }
     
-    $scope.solicitar = function(copy){
-        if (!copy) {
-            alert("Falha na requisição");
-            return;
-        }
+    $scope.solicitTrade = function(booksIndex, copiesIndex){
+    
+    var cookiesUser = $cookies.get('EA975');
+    console.log(cookiesUser);
+
+    var url = '/trade'
+
+    console.log($scope.jsonCopies[copiesIndex]);
+    console.log($scope.jsonBooks[booksIndex].title);
+    console.log($scope.jsonCopies[copiesIndex].copyID);
+
+    var data = {};
+       data = {
+        "UserReq": cookiesUser,
+        "UserResp": $scope.jsonCopies[copiesIndex].owner,
+        "titleBook": $scope.jsonBooks[booksIndex].title,
+        "copyID": $scope.jsonCopies[copiesIndex].copyID
+    };
+
+
+    console.log(data);
+
         var request = $http({
-            method : 'post',
-            url : '/trades',
-            data : copy
+            "method" : "post",
+            "url" : url,
+            "data" : data
             });
+        
         request.success(function(reply){
             alert(reply.resultado);
             $scope.copies = null;
         });
+        
         request.error(function(reply){
             alert("Não foi possível solicitar a troca =(");
         });

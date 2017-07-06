@@ -10,6 +10,7 @@
  var mongoBooks = require('./models/mongoBooks');
  var mongoTrade = require('./models/mongoTrade');
  var mongoCopies = require('./models/mongoCopies');
+ var mongoUsers = require('./models/mongoUsers');
 
  var app = express();
 
@@ -575,6 +576,38 @@ router.route('/bookID/:owner') // operacoes sobre um exemplar
          })
      });
 
+router.route('/copies/owner/:bookID') // operacoes sobre um exemplar
+     .get(function(req, res) { // GET
+         var response = {};
+         var query = {
+             "bookID": req.params.bookID
+         };
+
+         console.log(req.path);
+         console.log(JSON.stringify(req.body));
+         console.log(query);
+
+         mongoCopies.find(query, function(erro, data) {
+
+             if (erro) {
+                 response = {
+                     "resultado": "Falha de acesso ao BD."
+                 };
+                 res.json(response);
+             } else if (data == null) {
+                 response = {
+                     "resultado": "Exemplar inexistente."
+                 };
+                 res.json(response);
+             } else {
+                 response = {
+                     "Copies": data
+                 };
+                 res.json(response);
+             }
+         })
+     });
+
  /*
   *   OPERAÇÕES DE TROCA
   */
@@ -611,10 +644,13 @@ router.route('/bookID/:owner') // operacoes sobre um exemplar
 
              if (data == null) {
                  var db = new mongoTrade();
-                 db.idTrade = req.body.idTrade;
+                 db.idTrade = Math.floor(Math.random() * 984975495) + 1;;
                  db.UserReq = req.body.UserReq;
                  db.UserResp = req.body.UserResp;
                  db.titleBook = req.body.titleBook;
+                 db.copyID = req.body.copyID;
+
+                 console.log(db);
 
                  db.save(function(erro) {
                      if (erro) {
@@ -680,8 +716,7 @@ router.route('/trade/id/:idTrade')
            "idTrade": req.params.idTrade
        };
 
-        console.log("aaaaaaaaaaaaa me ajuda!!!!");
-       console.log(req.path);
+        console.log(req.path);
        console.log(JSON.stringify(req.params.idTrade));
 
        mongoTrade.findOneAndRemove(query, function(erro, data) {

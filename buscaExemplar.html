@@ -83,11 +83,11 @@ app.controller('myCtrl', function($scope, $http, $cookies) {
 
                 request.success(function(reply) {
                     if (reply.Copies != null) {
+                        $scope.howner = "Dono"
                         $scope.jsonCopies = reply.Copies;
                         $scope.copies = reply.Copies;
                         console.log($scope.copies);
 
-                        $scope.headerTitle = "Dono";
 
                     } else {
                         alert(reply.resultado);

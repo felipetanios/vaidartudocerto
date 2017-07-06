@@ -51,8 +51,8 @@
 
 <script>
 
-var app = angular.module('myApp', []);
-app.controller('myCtrl', function($scope, $http) {
+var app = angular.module('myApp', ['ngCookies']);
+app.controller('myCtrl', function($scope, $http, $cookies){
     $scope.showdenied = {};
     $scope.showaccepted = {};
     $scope.jsonTrades = {};
@@ -63,9 +63,12 @@ app.controller('myCtrl', function($scope, $http) {
 
     $scope.show = function() {
 
+        var cookiesUser = $cookies.get('EA975');
+        console.log(cookiesUser);
+
         var url = "/trade";
 
-        url = "/trade/" + "Batata"; // ATENÇÃO: SUBSTITUIR PELO USUARIO LOGADO
+        url = "/trade/" + cookiesUser; // ATENÇÃO: SUBSTITUIR PELO USUARIO LOGADO
 
         var requestTrade = $http({
             "method": "get",
@@ -88,7 +91,7 @@ app.controller('myCtrl', function($scope, $http) {
 
                 var urlsecond = "/bookID";
 
-                urlsecond = "/bookID/" + "Batata";
+                urlsecond = "/bookID/" + cookiesUser;
 
                 var requestCopies = $http({
                     "method": "get",
@@ -180,9 +183,9 @@ app.controller('myCtrl', function($scope, $http) {
         request.success(function(reply) {
 
           if (reply != null) {
-              alert(reply);
+              alert("Troca Rejeitada");
           } else {
-              alert(reply);
+              alert("Não foi possível realizar essa operação");
           }
 
       });

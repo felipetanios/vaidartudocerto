@@ -11,7 +11,7 @@ var trocasSchema = new Schema({
     "UserReq": String,
     "UserResp": String,
     "titleBook": String,
-    "copyID": Number
+    "bookID": Number
 });
 
 module.exports = conn2.model('trocas', trocasSchema);

@@ -440,6 +440,8 @@ router.route('/books/search/:bookID') // operacoes sobre um livro
          })
      });
 
+ router.route
+
  router.route('/copies/:owner') // operacoes sobre um exemplar
      .get(function(req, res) { // GET
          var response = {};
@@ -648,7 +650,7 @@ router.route('/copies/owner/:bookID') // operacoes sobre um exemplar
                  db.UserReq = req.body.UserReq;
                  db.UserResp = req.body.UserResp;
                  db.titleBook = req.body.titleBook;
-                 db.copyID = req.body.copyID;
+                 db.bookID = req.body.bookID;
 
                  console.log(db);
 

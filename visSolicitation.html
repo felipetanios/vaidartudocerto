@@ -192,8 +192,59 @@ app.controller('myCtrl', function($scope, $http, $cookies){
     }
 
     $scope.acceptTrade = function(indexTrade, indexCopies) {
-        $scope.showaccepted[indexCopies] = true;
-    }
+    $scope.showaccepted[indexCopies] = true;
+
+    console.log($scope.jsonTrades[indexTrade]);
+    var url = "/copies/" + $scope.jsonTrades[indexTrade].UserReq + "/" + $scope.jsonTrades[indexTrade].bookID;
+    console.log(url);
+
+    var requestTrade = $http({
+        "method": "delete",
+        "url": url
+    });
+
+    request.success(function(reply) {
+
+        if (reply != null) {
+            url = "/copies/" + $scope.jsonCopies[indexCopies].owner + "/" + $scope.jsonCopies[indexCopies].bookID;
+            console.log(url);
+
+            var requestTrade = $http({
+                "method": "delete",
+                "url": url
+            });
+
+            request.success(function(reply) {
+
+                if (reply != null) {
+                    url = "/trade/id/" + $scope.jsonTrades[indexTrade].idTrade;
+                    console.log(url);
+
+                    var requestTrade = $http({
+                        "method": "delete",
+                        "url": url
+                    });
+
+                    request.success(function(reply) {
+
+                        if (reply != null) {
+                            alert("Troca Rejeitada");
+                        } else {
+                            alert("Não foi possível realizar essa operação");
+                        }
+
+                    });
+                } else {
+                    alert("Não foi possível realizar essa operação");
+                }
+
+            });
+        } else {
+            alert("Não foi possível realizar essa operação");
+        }
+
+    });
+}
 
 });
 

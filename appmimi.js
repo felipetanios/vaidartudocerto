@@ -438,32 +438,6 @@ router.route('/books/search/:bookID') // operacoes sobre um livro
              }
          })
      });
- /*.put(function(req, res) {   // PUT (altera exemplar)
-     var response = {};
-     var query = {"copyID": req.params.copyID};
-     var data = {"owner": req.params.owner, "bookID": req.body.bookID, "copyID": req.body.copyID};
-
-     console.log(req.path);
-     console.log(JSON.stringify(req.body));
-     console.log(query);
-
-     /*mongoBooks.findOneAndUpdate(query, data, function(erro, data) {
-         
-         if(erro) {
-           response = {"resultado": "Falha de acesso ao BD!"};
-           res.json(response);
-         } else if (data == null) { 
-            response = {"resultado": "Exemplar inexistente."};
-            res.json(response);   
-         } else {
-            response = {"resultado": "Exemplar atualizado."};
-            res.json(response);   
-   }
-       }
-     )
-   }
- )*/
-
 
  router.route('/copies/:owner') // operacoes sobre um exemplar
      .get(function(req, res) { // GET
@@ -699,36 +673,72 @@ router.route('/bookID/:owner') // operacoes sobre um exemplar
          })
      });
 
-
- /*
-
- router.route('/copies/:owner')   // operacoes sobre um exemplar
-   .get(function(req, res) {   // GET
+router.route('/trade/id/:idTrade')
+    .delete(function(req, res) {
        var response = {};
-       var query = {"owner": req.params.owner};
+       var query = {
+           "idTrade": req.params.idTrade
+       };
 
+        console.log("aaaaaaaaaaaaa me ajuda!!!!");
        console.log(req.path);
-       console.log(JSON.stringify(req.body));
-       console.log(query);
+       console.log(JSON.stringify(req.params.idTrade));
 
-       mongoCopies.find(query, function(erro, data) {
-        
-          if(erro) {
-             response = {"resultado": "Falha de acesso ao BD."};
-             res.json(response);
-          } else if (data == null) {
-             response = {"resultado": "Exemplar inexistente."};
-             res.json(response);   
-          } else {
-             response = {"copies": [data]};
-             console.log(response);
-             res.json(response);
+       mongoTrade.findOneAndRemove(query, function(erro, data) {
+    
+        if (erro) {
+           response = {
+               "resultado": "Falha de acesso ao BD!"
+           };
+           console.log(response);
+           res.json(response);
+       } else if (data == null) {
+           response = {
+               "resultado": "Troca inexistente."
+           };
+           console.log(response);
+           res.json(response);
+       } else {
+           response = {
+               "resultado": "Troca removido do seu inventório."
+           };
+           console.log(response);
+           res.json(response);
+       }
 
-           }
-         }
-       )
+     })
+    });
 
- */
+// //Remove usuario
+//  .delete(function(req, res) { // POST (cria)
+//      if (!checkAuth(req, res)) return;
+//      user = returnUser(req, res);
+//      console.log(user);
+//      var query = {
+//          "user": user
+//      }
+//      var response = {};
+
+//      mongoUsers.findOneAndRemove(query, function(erro, data) {
+//          if (erro) {
+//              response = {
+//                  "resultado": "falha de acesso ao DB"
+//              };
+//              res.json(response);
+//          } else if (data == null) {
+//              response = {
+//                  "resultado": "Usuario inexistente"
+//              };
+//              res.json(response);
+//          } else {
+//              res.clearCookie('EA975'); //desloga o usuario
+//              response = {
+//                  "resultado": "Usuario removido"
+//              };
+//              res.json(response);
+//          }
+//      })
+//  });
 
 
  /*--------------USER SIGNUP--------------*/

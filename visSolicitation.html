@@ -29,14 +29,18 @@
                       <p ng-show="showdenied[$index]"><strong>Troca Rejeitada</strong></p> 
                     <table cellspacing="8">
                         <tr>
-                            <th>{{howner}}</th>
-                            <th>{{hbookID}}</th>
-                            <th>{{hcopyID}}</th>
+                            <th>{{htitle}}</th>
+                            <th>{{harea}}</th>
+                            <th>{{hauthor}}</th>
                         </tr>
-                        <tr ng-repeat="x in copies">
-                            <td>{{ x.owner }}</td>
-                            <td>{{ x.bookID }}</td>
-                            <td>{{ x.copyID }}</td>
+                        <tr ng-repeat="y in books">
+                            <td>{{ y.title }}</td>
+                            <td>{{ y.area }}</td>
+                            <td>{{ y.author }}</td>
+                            <td>
+                              <button ng-click="acceptTrade($parent.$index, $index)"><strong>Quero trocar!</strong></button>
+                              <p ng-show="showaccepted[$index]"><strong>Troca aceita</strong></p> 
+                            </td>
                         </tr>
                     </table>
                 </td>
@@ -44,29 +48,12 @@
         </table>
 
 
-<!-- <body ng-app="NgHideShowApp">
-  <div ng-controller="AppCtrl">
-       
-        <table>
-        <tbody>
-            <tr ng-repeat="user in users">
-                <td>{{user.name}}</td>
-                <td>
-      <button ng-click="accept($index)"><strong>accept</strong></button>
-      <button ng-click="refuse($index)"><strong>refuse</strong></button>    
-        <p ng-show="showacceptation[$index]"><strong>je suis ton amis</strong></p> 
-        <p ng-show="showdenied[$index]"><strong>you refuse me</strong></p>      
-                </td>
-            </tr>
-        </tbody>
-        </table>
-    </div>
-</body> -->
 <script>
 
 var app = angular.module('myApp', []);
 app.controller('myCtrl', function($scope, $http) {
     $scope.showdenied = {};
+    $scope.showaccepted = {};
     $scope.jsonTrades = {};
     $scope.jsonCopies = {};
     $scope.jsonBooks = {};
@@ -91,6 +78,7 @@ app.controller('myCtrl', function($scope, $http) {
             if (reply.Trocas != null) {
 
                 $scope.trades = reply.Trocas;
+                $scope.jsonTrades = reply.Trocas;
                 console.log($scope.trades);
                 $scope.hbooktitle = "Título";
                 $scope.huserreq = "UserReq";
@@ -111,10 +99,8 @@ app.controller('myCtrl', function($scope, $http) {
                     if (reply.Copies != null) {
 
                         $scope.copies = reply.Copies;
+                        $scope.jsonCopies = reply.Copies;
                         console.log($scope.copies);
-                        $scope.howner = "Dono";
-                        $scope.hbookID = "ID do livro";
-                        $scope.hcopyID = "ID da cópia";
 
                         for (i in $scope.copies) {
                           copiesIDs.push($scope.copies[i].bookID);
@@ -141,7 +127,12 @@ app.controller('myCtrl', function($scope, $http) {
 
                             if (reply.books != null) {
                                 $scope.books = reply.books;
+                                $scope.jsonBooks = reply.books;
                                 console.log($scope.books);
+                                $scope.htitle = "Título";
+                                $scope.harea = "Área";
+                                $scope.hauthor = "Autor";
+
                             } else {
                                 alert(reply.resultado);
                             }
@@ -166,35 +157,44 @@ app.controller('myCtrl', function($scope, $http) {
 
     };
 
-    $scope.rejectTrade = function(idx) {
-        $scope.showdenied[idx] = true;
+    $scope.rejectTrade = function(indexTrade) {
+        $scope.showdenied[indexTrade] = true;
+        console.log("feeling groovy");
+        console.log($scope.jsonTrades);
+        console.log($scope.jsonCopies);
+        console.log($scope.jsonBooks);
+
+        console.log($scope.jsonTrades[indexTrade]);
+
+        var url = "/trade/id";
+
+        url = "/trade/id/" + $scope.jsonTrades[indexTrade].idTrade;
+        console.log(url);
+
+        var requestTrade = $http({
+            "method": "delete",
+            "url": url
+        });
+
+        request.success(function(reply) {
+
+          if (reply != null) {
+              alert(reply);
+          } else {
+              alert(reply);
+          }
+
+      });
+    }
+
+    $scope.acceptTrade = function(indexTrade, indexCopies) {
+        $scope.showaccepted[indexCopies] = true;
     }
 
 });
 
 
-// angular.module('NgHideShowApp', [])
-//  .controller('AppCtrl',['$scope', function($scope){
-//      $scope.showacceptation ={};
-//      $scope.showdenied = {};
-     
-     
-//      $scope.users = [{name: 'firstUser'},
-//       {name: 'secondUser'}, 
-//       {name: 'User3'},
-//       {name: 'User4'}];
 
-//    $scope.accept = function(idx){
-//        $scope.showacceptation[idx] = true;
-//        $scope.showdenied[idx] = false;
-//    }
-
-//    $scope.refuse = function(idx){
-//      $scope.showdenied[idx] = true;
-//        $scope.showacceptation[idx] = false;
-//    } 
-
-// }]);
 </script> 
 
 </body>

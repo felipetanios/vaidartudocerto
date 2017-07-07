@@ -57,9 +57,9 @@ app.controller('myCtrl', function($scope, $http) {
   }
   // ACESSA
   $scope.acessa = function() {
-    var url = "/books/title";
+    var url = "/books/";
     if ($scope.titleb != undefined){
-      url = "/books/title" + $scope.titleb;
+      url = "/books/" + $scope.titleb;
     }else{
       alert("Preencha o título do livro.");
     }

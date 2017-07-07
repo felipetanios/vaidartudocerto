@@ -35,10 +35,18 @@
 
   </form>
   <br><br>
+  <a href="buscaExemplar.html">Clique aqui</a> para fazer solicitações de troca.
+  <br><br>
   Tem um exemplar de um livro ainda não cadastrado? Então <a href="insertBooks.html">clique aqui</a> para inseri-lo no nosso banco de dados, antes de cadastrar seu exemplar.<br><br>
 
 
   Gostaria de pesquisar um livro? <a href="index.html">Clique aqui </a> para voltar para a pagina de pesquisa!
+
+  <br><br>
+  <a href="visSolicitation.html">Clique aqui</a> para ver suas solicitações de troca.
+
+  <br><br>
+  <a href="index.html">Clique aqui</a> para voltar para a página inicial.
 
 </div>
 
@@ -54,7 +62,7 @@ app.controller('myCtrl', function($scope, $http, $cookies) {
 
     var cookiesUser = $cookies.get('EA975');
     console.log(cookiesUser);
-    url = "/copies/" + cookiesUser; 
+    url = "/copies/" + cookiesUser;
 
     var request = $http({
                  "method": "get",
@@ -81,7 +89,7 @@ app.controller('myCtrl', function($scope, $http, $cookies) {
 
 
         url = "/books/bookID";
-        var data = ""; 
+        var data = "";
         data = {"bookID": booksIDs};
 
         request = $http({
@@ -130,7 +138,7 @@ app.controller('myCtrl', function($scope, $http, $cookies) {
       }
       var cookiesUser = $cookies.get('EA975');
       console.log(cookiesUser);
-      var data = {"title": $scope.titlec, "owner": cookiesUser}; 
+      var data = {"title": $scope.titlec, "owner": cookiesUser};
 
       console.log(data);
 
@@ -169,7 +177,7 @@ app.controller('myCtrl', function($scope, $http, $cookies) {
      }
      var request = $http({
                  "method": "get",
-                 "url": "/books/title" + $scope.titlec});
+                 "url": "/books/title/" + $scope.titlec});
      request.success(function(reply) {
         if(reply.books != null) {
          bookID = reply.books[0].bookID;

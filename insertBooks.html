@@ -17,17 +17,18 @@
     Autor: <input type="text" ng-model="author"><br><br>
     Área: <input type="text" ng-model="area"><br><br>
     <button ng-click="insere()">INSERE</button> &nbsp;
-    <button ng-click="atualiza()">ATUALIZA</button> &nbsp;
-    
-  </form>
 
-<br><br>
+  </form>
+  <br><br>
+  <a href="index.html">Clique aqui</a> para ir para a página inicial.<br><br>
+
+  <br><br>
 
 
 <script>
 var app = angular.module('myApp', []);
 app.controller('myCtrl', function($scope, $http) {
-  
+
   // INSERE
   $scope.insere = function() {
       if ($scope.titlec == undefined || $scope.titlec.length == 0 ||
@@ -40,9 +41,9 @@ app.controller('myCtrl', function($scope, $http) {
       var data = {"title": $scope.titlec,
                   "author": $scope.author,
                   "area": $scope.area,
-                  
+
                 };
-      
+
       console.log(data);
 
       var request = $http({
@@ -94,12 +95,12 @@ app.controller('myCtrl', function($scope, $http) {
     $scope.titlec = "";
     $scope.area = "";
     $scope.author = "";
-    
+
   }
-  
+
   }
 );
-</script> 
+</script>
 
 </body>
 </html>

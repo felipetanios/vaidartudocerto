@@ -123,7 +123,7 @@
              response = {"resultado": "Falha de acesso ao BD"};
            else
              response = {"books": data};
-             
+
              res.json(response);
            }
          )
@@ -248,7 +248,7 @@
              "title": req.params.title
          };
          var data = {
-             "title": req.params.title, //"nCopies": req.params.nCopies, //"owner": req.body.owner, 
+             "title": req.params.title, //"nCopies": req.params.nCopies, //"owner": req.body.owner,
              "author": req.body.author,
              "area": req.body.area
          };
@@ -307,7 +307,7 @@
          })
      });
 
-router.route('/books/bookID')
+ router.route('/books/bookID')
   .post(function(req, res) {   // GET
       var response = {};
       var query = {"bookID": req.body.bookID};
@@ -317,13 +317,13 @@ router.route('/books/bookID')
       console.log(query);
 
       mongoBooks.find(query, function(erro, data) {
-       
+
          if(erro) {
             response = {"resultado": "Falha de acesso ao BD."};
             res.json(response);
          } else if (data == null) {
             response = {"resultado": "Livro inexistente."};
-            res.json(response);   
+            res.json(response);
          } else {
             response = {"books": data};
             console.log(response);
@@ -331,12 +331,12 @@ router.route('/books/bookID')
 
           }
         }
-      )      
+      )
     }
   );
 
 
-router.route('/books/search/:bookID') // operacoes sobre um livro
+ router.route('/books/search/:bookID') // operacoes sobre um livro
      .get(function(req, res) { // GET
          var response = {};
          var query = {
@@ -397,7 +397,7 @@ router.route('/books/search/:bookID') // operacoes sobre um livro
                  var db = new mongoCopies();
                  db.owner = req.body.owner;
                  db.bookID = data.bookID;
-                 // gera id do exemplar 
+                 // gera id do exemplar
                  db.copyID = Math.floor(Math.random() * 10000000000) + 1;
 
                  db.save(function(erro) {
@@ -545,7 +545,7 @@ router.route('/books/search/:bookID') // operacoes sobre um livro
 
      );
 
-router.route('/bookID/:owner') // operacoes sobre um exemplar
+ router.route('/bookID/:owner') // operacoes sobre um exemplar
      .get(function(req, res) { // GET
          var response = {};
          var query = {
@@ -578,7 +578,7 @@ router.route('/bookID/:owner') // operacoes sobre um exemplar
          })
      });
 
-router.route('/copies/owner/:bookID') // operacoes sobre um exemplar
+ router.route('/copies/owner/:bookID') // operacoes sobre um exemplar
      .get(function(req, res) { // GET
          var response = {};
          var query = {
@@ -711,7 +711,7 @@ router.route('/copies/owner/:bookID') // operacoes sobre um exemplar
          })
      });
 
-router.route('/trade/id/:idTrade')
+ router.route('/trade/id/:idTrade')
     .delete(function(req, res) {
        var response = {};
        var query = {
@@ -722,7 +722,7 @@ router.route('/trade/id/:idTrade')
        console.log(JSON.stringify(req.params.idTrade));
 
        mongoTrade.findOneAndRemove(query, function(erro, data) {
-    
+
         if (erro) {
            response = {
                "resultado": "Falha de acesso ao BD!"
@@ -745,6 +745,7 @@ router.route('/trade/id/:idTrade')
 
      })
     });
+
 
 // //Remove usuario
 //  .delete(function(req, res) { // POST (cria)
@@ -835,6 +836,7 @@ router.route('/trade/id/:idTrade')
      .delete(function(req, res) { // POST (cria)
          if (!checkAuth(req, res)) return;
          user = returnUser(req, res);
+         query1 = {"owner": user};
          console.log(user);
          var query = {
              "user": user
@@ -853,6 +855,7 @@ router.route('/trade/id/:idTrade')
                  };
                  res.json(response);
              } else {
+                mongoCopies.remove(query1, function(erro,data){});
                  res.clearCookie('EA975'); //desloga o usuario
                  response = {
                      "resultado": "Usuario removido"
